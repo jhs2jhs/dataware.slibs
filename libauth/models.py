@@ -109,6 +109,9 @@ class Registration(models.Model):
     register_request_token = models_type_token()
     register_request_scope = models_type_access_scope()
 
+    registrant_redirect_token = models_type_token()
+    register_redirect_token = models_type_token()
+
     registrant_access_token = models_type_token()
     registrant_access_validate = models_type_validate_code()
     
