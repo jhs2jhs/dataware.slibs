@@ -2,8 +2,27 @@ import urllib
 import hashlib
 from datetime import datetime
 from django.db import models
+from django.http import HttpResponse, HttpResponseBadRequest
 
 class url_keys(object):
+    # for each regist
+    regist_status = 'REGIST_STATUS'
+    regist_type = 'REGIST_TYPE'
+    regist_callback = 'REGIST_CALLBACK'
+    register_callback = 'REGISTER_CALLBACK'
+    registrant_callback = 'REGISTRANT_CALLBACK'
+    registrant_request_token = 'REGISTRANT_REQUEST_TOKEN'
+    registrant_request_scope = 'REGISTRANT_REQUEST_SCOPE'
+    registrant_redirect_token = 'REGISTRANT_REDIRECT_TOKEN'
+    registrant_user_token = 'REGISTRANT_USER_TOKEN'
+    registrant_access_token = 'REGISTRANT_ACCESS_TOKEN'
+    registrant_validation = 'REGISTRANT_VALIDATION'
+    register_request_token = 'REGISTER_REQUEST_TOKEN'
+    register_request_scope = 'REGISTER_REQUEST_SCOPE'
+    register_redirect_token = 'REGISTRANT_REDIRECT_TOKEN'    
+    register_user_token = 'REGISTER_USER_TOKEN'
+    register_access_token = 'REGISTER_ACCESS_TOKEN'
+    register_validation = 'REGISTER_VALIDATION'    
     # registration between catalog and resource
     # 1. REQUEST
     catalog_callback = 'catalog_callback'
@@ -29,6 +48,8 @@ class url_keys(object):
 
 
 class form_label(object):
+    regist_type = 'regist_type'
+    register_callback = 'register_callback'
     # OWNER_REQUEST
     owner_request_callback = 'Catalog callback'
     owner_request_token = 'Catalog request token'
@@ -66,4 +87,35 @@ def token_create_user(other_callback, user_id):
 
 def request_get(param, key):
     return param.get(key, None)
+
+def request_params_get(params):
+    request_params = {
+        url_keys.regist_status: request_get(params, url_keys.regist_status),
+        url_keys.regist_type: request_get(params, url_keys.regist_type),
+        url_keys.regist_callback: request_get(params, url_keys.regist_callback),
+        url_keys.registrant_request_token: request_get(params, url_keys.registrant_request_token),
+        url_keys.registrant_request_scope: request_get(params, url_keys.registrant_request_scope),
+        url_keys.registrant_redirect_token: request_get(params, url_keys.registrant_redirect_token),
+        url_keys.registrant_user_token: request_get(params, url_keys.registrant_user_token),
+        url_keys.registrant_access_token:request_get(params, url_keys.registrant_access_token),
+        url_keys.registrant_validation: request_get(params, url_keys.registrant_validation),
+        url_keys.register_request_token: request_get(params, url_keys.register_request_token),
+        url_keys.register_request_scope: request_get(params, url_keys.register_request_scope),
+        url_keys.register_redirect_token: request_get(params, url_keys.register_redirect_token),
+        url_keys.register_user_token: request_get(params, url_keys.register_user_token),
+        url_keys.register_access_token: request_get(params, url_keys.register_access_token),
+        url_keys.register_validation: request_get(params, url_keys.register_validation)
+        }
+    return request_params
+
+def error_response(type, params):
+    if type == 1:
+        return HttpResponseBadRequest('%s is not found in http request'%params)
+    if type == 2:
+        return HttpResponseBadRequest('%s is found but incorrect (%s) in http request'%params)
+
+def find_key_by_value(tuples, value):
+    key = [k for (k, v) in tuples if v == value][0]
+    return key
+
 
