@@ -9,8 +9,17 @@ class url_keys(object):
     regist_status = 'REGIST_STATUS'
     regist_type = 'REGIST_TYPE'
     regist_callback = 'REGIST_CALLBACK'
+    registrant_init_action = "REGISTRANT_INIT_ACTION"
+    registrant_init_action_generate = "Generate"
+    registrant_init_action_request = "Request"
     register_callback = 'REGISTER_CALLBACK'
     registrant_callback = 'REGISTRANT_CALLBACK'
+    register_request_reminder = "REGISTER_REMINDER"
+    registrant_request_reminder = "REGISTRANT_REMINDER"
+    register_request_user_public = "REGISTER_USER_PUBLIC"
+    registrant_request_user_public = "REGISTRANT_USER_PUBLIC"
+    register_request_media = "REGISTER_REQUEST_MEDIA"
+    registrant_request_media = "REGISTRANT_REQUEST_MEDIA"
     registrant_request_token = 'REGISTRANT_REQUEST_TOKEN'
     registrant_request_scope = 'REGISTRANT_REQUEST_SCOPE'
     registrant_redirect_token = 'REGISTRANT_REDIRECT_TOKEN'
@@ -115,7 +124,10 @@ def error_response(type, params):
         return HttpResponseBadRequest('%s is found but incorrect (%s) in http request'%params)
 
 def find_key_by_value(tuples, value):
-    key = [k for (k, v) in tuples if v == value][0]
-    return key
+    key = [k for (k, v) in tuples if v == value]
+    if len(key) == 0:
+        return None
+    else:
+        return key[0]
 
 

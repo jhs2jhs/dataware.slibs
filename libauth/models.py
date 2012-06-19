@@ -15,6 +15,12 @@ def models_type_access_scope():
 def models_type_validate_code():
     return models.CharField(max_length=256, null=True)
 
+def models_type_reminder():
+    return models.CharField(max_length=256, null=True)
+
+def models_type_request_user_public():
+    return models.CharField(max_length=256, null=True)
+
 class REGIST_ROLE(object):
     unclear = 'UNCLEAR'
     resource = 'DATAWARE_RESOURCE'
@@ -72,6 +78,17 @@ REGIST_STATUS_CHOICES = (
     (10, REGIST_STATUS.finish),
     )
 
+REQUEST_MEDIA = {
+    'desktop_browser': "Desktop_Browser", # key:desc
+    'email': "Email",
+    }
+    
+REQUEST_MEDIA_CHOICES = (
+    (1, REQUEST_MEDIA['desktop_browser']),
+    (2, REQUEST_MEDIA['email']),
+    )
+    
+
 
 # registrant: entity who want to register: registrant regist on register
 # register: entity who was been register on: registrant regist on register 
@@ -98,6 +115,13 @@ class Registration(models.Model):
     register_access_token = models_type_token()
     register_access_validate = models_type_validate_code()
 
+    registrant_request_reminder = models_type_reminder()
+    register_request_reminder = models_type_reminder()
+    registrant_request_user_public = models_type_request_user_public()
+    register_request_user_public = models_type_request_user_public()
+    registrant_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=1) # default is desktop_browser
+    register_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=1) # default is desktop_browser
+
     def __unicode__(self):
         return '{Registrant(%s) | Register(%s)}'%(self.registrant_callback, self.register_callback)
 
@@ -105,6 +129,7 @@ class Registration(models.Model):
 class regist_dealer(object):
     def __init__(self, request):
         self.request = request
+        self.user = request.user
     def regist_init(self): pass
     def registrant_request(self): pass
     def register_owner_redirect(self): pass
@@ -122,13 +147,15 @@ def regist_steps(regist_dealer, request):
     if regist_status == None:
         return error_response(1, url_keys.regist_status)
     if regist_status == REGIST_STATUS.init: # may not be necessary
+        #@login_required
         return regist_dealer.regist_init()
     if regist_status == REGIST_STATUS.registrant_request:
         return regist_dealer.registrant_request()
     if regist_status == REGIST_STATUS.register_owner_redirect:
-        return regist_dealer.registrant_owner_redirect()
+        #@login_required
+        return regist_dealer.register_owner_redirect()
     if regist_status == REGIST_STATUS.register_owner_grant:
-        return regist_dealer.registrant_owner_grant()
+        return regist_dealer.register_owner_grant()
     if regist_status == REGIST_STATUS.register_grant:
         return regist_dealer.register_grant()
     if regist_status == REGIST_STATUS.registrant_owner_redirect:
@@ -150,6 +177,12 @@ def find_key_by_value_regist_type(regist_type):
 
 def find_key_by_value_regist_status(regist_status):
     key = find_key_by_value(REGIST_STATUS_CHOICES, regist_status)
+    return key
+
+def find_key_by_value_regist_request_media(regist_request_media):
+    key = find_key_by_value(REQUEST_MEDIA_CHOICES, regist_request_media)
+    if key == None:
+        return 1 # the default one is to view by browser
     return key
 
     
