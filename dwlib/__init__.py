@@ -19,6 +19,8 @@ class url_keys(object):
     regist_redirect_action_grant = "Grant_Permission"
     regist_redirect_action_modify_scope = "Modify_Request_Scope"
     regist_redirect_action_wrong_user = "Wrong_User"
+    register_request_action = 'REGISTER_REQUEST_ACTION'
+    register_request_action_request = 'Request'
     register_callback = 'REGISTER_CALLBACK'
     registrant_callback = 'REGISTRANT_CALLBACK'
     register_request_reminder = "REGISTER_REMINDER"
@@ -32,13 +34,13 @@ class url_keys(object):
     registrant_redirect_token = 'REGISTRANT_REDIRECT_TOKEN'
     registrant_user_token = 'REGISTRANT_USER_TOKEN'
     registrant_access_token = 'REGISTRANT_ACCESS_TOKEN'
-    registrant_validation = 'REGISTRANT_VALIDATION'
+    registrant_access_validate = 'REGISTRANT_VALIDATION'
     register_request_token = 'REGISTER_REQUEST_TOKEN'
     register_request_scope = 'REGISTER_REQUEST_SCOPE'
     register_redirect_token = 'REGISTER_REDIRECT_TOKEN'    
     register_user_token = 'REGISTER_USER_TOKEN'
     register_access_token = 'REGISTER_ACCESS_TOKEN'
-    register_validation = 'REGISTER_VALIDATION'    
+    register_access_validate = 'REGISTER_VALIDATION'    
     # registration between catalog and resource
     # 1. REQUEST
     catalog_callback = 'catalog_callback'
@@ -87,15 +89,15 @@ def signature_create(key):
     m.update(key)
     return m.hexdigest()
 
-def token_create(other_callback):# may need to add user as a unique party
-    param = {'start':str(datetime.now())}
+def token_create(other_callback, type_desc):# may need to add user as a unique party
+    param = {'start':str(datetime.now()), "type":type_desc}
     url_param = urlencode(param)
     key = '%s?%s'%(other_callback, param)
     token = signature_create(key)
     return token
 
-def token_create_user(other_callback, user_id):
-    param = {'start':str(datetime.now()), 'user_id':user_id}
+def token_create_user(other_callback, type_desc, user_id):
+    param = {'start':str(datetime.now()), 'type_desc':type_desc, 'user_id':user_id}
     url_param = urlencode(param)
     key = '%s?%s'%(other_callback, param)
     token = signature_create(key)
@@ -129,6 +131,10 @@ def error_response(type, params):
         return HttpResponseBadRequest('%s is not found in http request'%params)
     if type == 2:
         return HttpResponseBadRequest('%s is found but incorrect (%s) in http request'%params)
+    if type == 3:
+        return HttpResponseBadRequest('Token (%s) is not exist with value (%s)'%params)
+    if type == 4:
+        return HttpResponseBadRequest('Token (%s) is not expired with value (%s)'%params)
 
 def find_key_by_value(tuples, value):
     key = [k for (k, v) in tuples if v == value]

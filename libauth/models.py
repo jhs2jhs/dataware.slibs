@@ -189,3 +189,7 @@ def find_key_by_value_regist_request_media(regist_request_media):
     return key
 
     
+class TOKEN_TYPE(object):
+    request = "REQUEST"
+    access = "ACCESS"
+    redirect = 'REDIRECT'
