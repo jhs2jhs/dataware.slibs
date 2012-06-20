@@ -16,6 +16,9 @@ class url_keys(object):
     regist_redirect_action = 'regist_redirect_action'
     regist_redirect_action_redirect = 'Redirect'
     regist_redirect_action_login_redirect = 'Login&Redirect'
+    regist_redirect_action_grant = "Grant_Permission"
+    regist_redirect_action_modify_scope = "Modify_Request_Scope"
+    regist_redirect_action_wrong_user = "Wrong_User"
     register_callback = 'REGISTER_CALLBACK'
     registrant_callback = 'REGISTRANT_CALLBACK'
     register_request_reminder = "REGISTER_REMINDER"
@@ -32,7 +35,7 @@ class url_keys(object):
     registrant_validation = 'REGISTRANT_VALIDATION'
     register_request_token = 'REGISTER_REQUEST_TOKEN'
     register_request_scope = 'REGISTER_REQUEST_SCOPE'
-    register_redirect_token = 'REGISTRANT_REDIRECT_TOKEN'    
+    register_redirect_token = 'REGISTER_REDIRECT_TOKEN'    
     register_user_token = 'REGISTER_USER_TOKEN'
     register_access_token = 'REGISTER_ACCESS_TOKEN'
     register_validation = 'REGISTER_VALIDATION'    
