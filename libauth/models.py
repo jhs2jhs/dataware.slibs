@@ -31,24 +31,16 @@ def dict_to_choices(d):
     return choices
 
 # not used at moment
-class REGIST_ROLE(object):
-    unclear = 'UNCLEAR'
-    resource = 'DATAWARE_RESOURCE'
-    catalog = 'DATAWARE_CATALOG'
-    client = 'DATAWARE_CLIENT'
-    owner_resource = 'DATAWARE_RESOURCE_OWNER'
-    owner_catalog = 'DATAWARE_CATALOG_OWNER'
-    owner_client = 'DATAWARE_CLIENT_OWNER' # may not be used, just for position
-
-REGIST_ROLE_CHOICES = (
-    (0, REGIST_ROLE.unclear),
-    (1, REGIST_ROLE.resource),
-    (2, REGIST_ROLE.catalog),
-    (3, REGIST_ROLE.client),
-    (4, REGIST_ROLE.owner_resource),
-    (5, REGIST_ROLE.owner_catalog),
-    (6, REGIST_ROLE.owner_client),
-    )
+REGIST_ROLE = {
+    'unclear':'UNCLEAR',
+    'resource':'DATAWARE_RESOURCE',
+    'catalog':'DATAWARE_CATALOG',
+    'client':'DATAWARE_CLIENT',
+    'owner_resource':'DATAWARE_RESOURCE_OWNER',
+    'owner_catalog':'DATAWARE_CATALOG_OWNER',
+    'owner_client':'DATAWARE_CLIENT_OWNER', # may not be used, just for position
+}
+REGIST_ROLE_CHOICES = dict_to_choices(REGIST_ROLE)
 
 REGIST_TYPE = {
     'unclear':'UNCLEAR',
@@ -57,7 +49,7 @@ REGIST_TYPE = {
     'mutual':'MUTUAL',
     'one_way':'ONE_WAY',
     }
-REGIST_TYPE_CHOICES =dict_to_choices(REGIST_TYPE)
+REGIST_TYPE_CHOICES = dict_to_choices(REGIST_TYPE)
 
 class REGIST_STATUS(object):
     not_start = 'NOT_START'
@@ -91,12 +83,14 @@ REQUEST_MEDIA = {
     'email': "Email",
     }
     
-REQUEST_MEDIA_CHOICES = (
-    (1, REQUEST_MEDIA['desktop_browser']),
-    (2, REQUEST_MEDIA['email']),
-    )
-    
+REQUEST_MEDIA_CHOICES = dict_to_choices(REQUEST_MEDIA)
 
+TOKEN_TYPE = {
+    'request':"REQUEST",
+    'access':"ACCESS",
+    'redirect':'REDIRECT',
+    }
+    
 
 # registrant: entity who want to register: registrant regist on register
 # register: entity who was been register on: registrant regist on register 
@@ -148,8 +142,3 @@ def find_key_by_value_regist_request_media(regist_request_media):
         return 1 # the default one is to view by browser
     return key
 
-    
-class TOKEN_TYPE(object):
-    request = "REQUEST"
-    access = "ACCESS"
-    redirect = 'REDIRECT'
