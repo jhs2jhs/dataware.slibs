@@ -21,6 +21,15 @@ def models_type_reminder():
 def models_type_request_user_public():
     return models.CharField(max_length=256, null=True)
 
+def dict_to_choices(d):
+    choices = []
+    i = 1
+    for k, v in d.iteritems():
+        choice = (i, v)
+        choices.append(choice)
+        i = i + 1
+    return choices
+
 # not used at moment
 class REGIST_ROLE(object):
     unclear = 'UNCLEAR'
@@ -48,12 +57,7 @@ REGIST_TYPE = {
     'mutual':'MUTUAL',
     'one_way':'ONE_WAY',
     }
-
-REGIST_TYPE_CHOICES = (
-    (0, REGIST_TYPE.unclear),
-    (1, REGIST_TYPE.catalog_resource),
-    (2, REGIST_TYPE.client_catalog),
-    )
+REGIST_TYPE_CHOICES =dict_to_choices(REGIST_TYPE)
 
 class REGIST_STATUS(object):
     not_start = 'NOT_START'
