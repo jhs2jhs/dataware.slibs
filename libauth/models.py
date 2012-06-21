@@ -51,32 +51,19 @@ REGIST_TYPE = {
     }
 REGIST_TYPE_CHOICES = dict_to_choices(REGIST_TYPE)
 
-class REGIST_STATUS(object):
-    not_start = 'NOT_START'
-    init = 'INIT_REGISTER_REQUEST'
-    registrant_request = 'REGISTRANT_REQUEST'
-    register_owner_redirect = 'REGISTER_OWNER_REDIRECT'
-    register_owner_grant = 'REGISTER_OWNER_GRANT'
-    register_grant = 'REGISTER_GRANT'
-    registrant_owner_redirect = 'REGISTRANT_OWNER_REDIRECT'
-    registrant_owner_grant = 'REGISTRANT_OWNER_GRANT'
-    registrant_confirm = 'REGISTRANT_CONFIRM'
-    register_activate = 'REGISTER_ACTIVATE' # may not be used, just for position
-    finish = 'FINISH'
-
-REGIST_STATUS_CHOICES = (
-    (-1, REGIST_STATUS.not_start),
-    (0, REGIST_STATUS.init),
-    (1, REGIST_STATUS.registrant_request),
-    (2, REGIST_STATUS.register_owner_redirect),
-    (3, REGIST_STATUS.register_owner_grant),
-    (4, REGIST_STATUS.register_grant),
-    (5, REGIST_STATUS.registrant_owner_redirect),
-    (6, REGIST_STATUS.registrant_owner_grant),
-    (7, REGIST_STATUS.registrant_confirm),
-    (8, REGIST_STATUS.register_activate),
-    (10, REGIST_STATUS.finish),
-    )
+REGIST_STATUS = {
+    'not_start':'NOT_START',
+    'init':'INIT',
+    'registrant_request':'REGISTRANT_REQUEST',
+    'register_owner_redirect':'REGISTER_OWNER_REDIRECT',
+    'register_owner_grant':'REGISTER_OWNER_GRANT',
+    'register_grant':'REGISTER_GRANT',
+    'registrant_owner_redirect':'REGISTRANT_OWNER_REDIRECT',
+    'registrant_owner_grant':'REGISTRANT_OWNER_GRANT',
+    'registrant_confirm':'REGISTRANT_CONFIRM',
+    'finish':'FINISH',
+    }
+REGIST_STATUS_CHOICES = dict_to_choices(REGIST_STATUS)
 
 REQUEST_MEDIA = {
     'desktop_browser': "Desktop_Browser", # key:desc
@@ -95,8 +82,8 @@ TOKEN_TYPE = {
 # registrant: entity who want to register: registrant regist on register
 # register: entity who was been register on: registrant regist on register 
 class Registration(models.Model):
-    regist_type = models.IntegerField(max_length=2, choices=REGIST_TYPE_CHOICES, default=0)
-    regist_status = models.IntegerField(max_length=2, choices=REGIST_STATUS_CHOICES, default=-1)
+    regist_type = models.IntegerField(max_length=2, choices=REGIST_TYPE_CHOICES, default=0) # all default is 0, 0 mean not set
+    regist_status = models.IntegerField(max_length=2, choices=REGIST_STATUS_CHOICES, default=0)
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
 
@@ -121,8 +108,8 @@ class Registration(models.Model):
     register_access_token = models_type_token()
     register_access_validate = models_type_validate_code()
 
-    registrant_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=1) # default is desktop_browser
-    register_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=1) # default is desktop_browser
+    registrant_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=0)
+    register_request_media = models.IntegerField(max_length=2, choices=REQUEST_MEDIA_CHOICES, default=0) 
 
     def __unicode__(self):
         return '{Registrant(%s) | Register(%s)}'%(self.registrant_callback, self.register_callback)
