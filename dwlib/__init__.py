@@ -9,9 +9,13 @@ class url_keys(object):
     regist_status = 'REGIST_STATUS'
     regist_type = 'REGIST_TYPE'
     regist_callback = 'REGIST_CALLBACK'
-    registrant_init_action = "REGISTRANT_INIT_ACTION"
-    registrant_init_action_generate = "Generate"
-    registrant_init_action_request = "Request"
+    
+    regist_init_action = "REGIST_INIT_ACTION"
+    regist_init_action_generate = "Generate"
+    regist_init_action_request = "Request"
+    registrant_init_action = "REGISTRANT_INIT_ACTION"#
+    registrant_init_action_generate = "Generate"#
+    registrant_init_action_request = "Request"#
     regist_redirect_url = "regist_redirect_url"
     regist_redirect_action = 'regist_redirect_action'
     regist_redirect_action_redirect = 'Redirect'
@@ -140,6 +144,15 @@ def error_response(type, params):
         return HttpResponseBadRequest('Token (%s) is not exist with value (%s)'%params)
     if type == 4:
         return HttpResponseBadRequest('Token (%s) is not expired with value (%s)'%params)
+    if type == 5:
+        return HttpResponseBadRequest('You did not provide correct value for every required paramters')
+
+def check_compulsory(lists):
+    miss = False
+    for l in lists:
+        if l == None or l == '':
+            return False
+    return True
 
 def find_key_by_value(tuples, value):
     key = [k for (k, v) in tuples if v == value]
