@@ -21,6 +21,11 @@ class url_keys(object):
     regist_redirect_action_wrong_user = "Wrong_User"
     register_request_action = 'REGISTER_REQUEST_ACTION'
     register_request_action_request = 'Request'
+    registrant_request_action = "REGISTRANT_REQUEST_ACTION"
+    registrant_request_action_request = 'Request'
+    registrant_request_action_confirm = 'Confirm'
+    regist_activate_action = 'regist_activate_action'
+    regist_activate_action_activate = 'Activate'
     register_callback = 'REGISTER_CALLBACK'
     registrant_callback = 'REGISTRANT_CALLBACK'
     register_request_reminder = "REGISTER_REMINDER"

@@ -61,7 +61,7 @@ class REGIST_STATUS(object):
     registrant_owner_redirect = 'REGISTRANT_OWNER_REDIRECT'
     registrant_owner_grant = 'REGISTRANT_OWNER_GRANT'
     registrant_confirm = 'REGISTRANT_CONFIRM'
-    register_activate = 'REGISTER_COFNIRM' # may not be used, just for position
+    register_activate = 'REGISTER_ACTIVATE' # may not be used, just for position
     finish = 'FINISH'
 
 REGIST_STATUS_CHOICES = (
