@@ -21,6 +21,7 @@ def models_type_reminder():
 def models_type_request_user_public():
     return models.CharField(max_length=256, null=True)
 
+# not used at moment
 class REGIST_ROLE(object):
     unclear = 'UNCLEAR'
     resource = 'DATAWARE_RESOURCE'
@@ -40,10 +41,13 @@ REGIST_ROLE_CHOICES = (
     (6, REGIST_ROLE.owner_client),
     )
 
-class REGIST_TYPE(object):
-    unclear = 'UNCLEAR'
-    catalog_resource = 'CATALOG_RESOURCE'
-    client_catalog = 'CLIENT_CATALOG'
+REGIST_TYPE = {
+    'unclear':'UNCLEAR',
+    'catalog_resource':'CATALOG_RESOURCE',
+    'client_catalog':'CLIENT_CATALOG',
+    'mutual':'MUTUAL',
+    'one_way':'ONE_WAY',
+    }
 
 REGIST_TYPE_CHOICES = (
     (0, REGIST_TYPE.unclear),
