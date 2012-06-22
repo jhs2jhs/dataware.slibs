@@ -154,7 +154,7 @@ def method_register_owner_redirect(request, regist_callback_me):
             register_callback=regist_callback_me, 
             registrant_request_reminder=registrant_request_reminder, 
             registrant_request_user_public=registrant_request_user_public,
-            register_redirect_token=register_redirect_token)
+            regist_redirect_token=register_redirect_token)
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['register_owner_grant'],
@@ -179,7 +179,7 @@ def method_register_owner_redirect(request, regist_callback_me):
 def method_register_owner_grant(request, regist_callback_me):
     user = request.user
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
-    register_redirect_token = request_get(request.REQUEST, url_keys.register_redirect_token)
+    register_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
     if (check_compulsory((regist_type, register_redirect_token))) == False:
         return error_response(5, ())
     if (check_choice(REGIST_TYPE, regist_type)) == False:
@@ -187,6 +187,8 @@ def method_register_owner_grant(request, regist_callback_me):
     ## # need to check whether a redirect token is expired or not
     try:
         registration = Registration.objects.get(register_redirect_token=register_redirect_token)
+        if registration.regist_status > find_key_by_value_regist_status(REGIST_STATUS['register_grant']): # if this token is too old
+            return error_response(7, (url_keys.regist_redirect_token, register_redirect_token))
     except ObjectDoesNotExist:
         return error_response(3, (url_keys.register_redirect_token, register_redirect_token))
     regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_owner_grant'])
@@ -194,15 +196,16 @@ def method_register_owner_grant(request, regist_callback_me):
     registration.user = user
     registration.save()
     ##
-    register_grant_user_token = dwlib.token_create_user(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
-    registration.register_grant_user_token = register_grant_user_token
-    registration.save()
+    if registration.register_grant_user_token == None or registration.register_grant_user_token == '':
+        register_grant_user_token = dwlib.token_create_user(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
+        registration.register_grant_user_token = register_grant_user_token
+        registration.save()
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['register_grant'],
         url_keys.regist_type: regist_type,
-        url_keys.register_redirect_token:register_redirect_token,
-        url_keys.regist_grant_user_token: register_grant_user_token,
+        url_keys.register_redirect_token:registration.register_redirect_token,
+        url_keys.regist_grant_user_token: registration.register_grant_user_token,
         }
     url_params = dwlib.urlencode(params)
     url = '%s?%s'%(regist_callback_me, url_params)
@@ -214,8 +217,9 @@ def method_register_owner_grant(request, regist_callback_me):
     c['regist_request_reminder']['value'] = registration.registrant_request_reminder
     c['regist_request_user_public']['value'] = registration.registrant_request_user_public
     c['regist_status']['value'] = REGIST_STATUS['register_grant']
-    c['register_redirect_token']['value'] = register_redirect_token
-    c['regist_grant_user_token']['value'] = register_grant_user_token
+    c['regist_status_current']['value'] = REGIST_STATUS['register_owner_grant']
+    c['regist_redirect_token']['value'] = registration.register_redirect_token
+    c['regist_grant_user_token']['value'] = registration.register_grant_user_token
     c['regist_redirect_url']['value'] = url
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)

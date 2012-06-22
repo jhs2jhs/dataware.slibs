@@ -1,13 +1,15 @@
-{% extends "./base.html" %}
+{% extends "./base_regist.html" %}
 
-{% block content %}
+{% block regist %}
+
+<br>
+Do you want to grant this permission?<br><br>
 
 <form method="post" action="{{ regist_redirect_url.value }}">
-<input type="hidden" name="{{ register_redirect_token.label }}" value="{{ register_redirect_token.value }}" />
+<input type="hidden" name="{{ regist_redirect_token.label }}" value="{{ regist_redirect_token.value }}" />
 <input type="hidden" name="{{ regist_status.label }}" value="{{ regist_status.value }}" />
 <input type="hidden" name="{{ regist_type.label }}" value="{{ regist_type.value }}" />
 {% csrf_token %}
-Do you want to grant this permission?<br><br>
 <div>
 <table>
 Request:
