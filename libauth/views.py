@@ -105,6 +105,14 @@ def get_context_base_regist():
             'label': url_keys.register_redirect_token,
             'value': '',
             },
+        'registrant_callback': {
+            'label': url_keys.registrant_callback,
+            'value': '',
+            },
+        'registrant_request_token': {
+            'label': url_keys.registrant_request_token,
+            'value':'',
+            },
         }
     return c
 
@@ -222,6 +230,43 @@ def method_register_owner_redirect(request, regist_callback_me):
 
 
 ####
+@login_required
 def method_register_owner_grant(request, regist_callback_me):
+    user = request.user
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    register_redirect_token = request_get(request.REQUEST, url_keys.register_redirect_token)
+    if (check_compulsory((regist_type, register_redirect_token))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    ##
+    # I should have access token generate here, and have register_request_token generate in register grant page
+    ##
+    try:
+        registration = Registration.objects.get(register_redirect_token=register_redirect_token)
+    except ObjectDoesNotExist:
+        return error_response(3, (url_keys.register_redirect_token, register_redirect_token))
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_owner_grant'])
+    registration.regist_status = regist_status_key
+    registration.user = user
+    registration.save()
+    ##
+    c = get_context_base_regist()
+    c['registrant_callback']['value'] = registration.registrant_callback
+    c['registrant_request_token']['value'] = registration.registrant_request_token
+    c['registrant_request_scope']['value'] = registration.registrant_request_scope
+    c['registrant_request_reminder']['value'] = registration.registrant_request_reminder
+    c['registrant_request_user_public']['value'] = registration.registrant_request_user_public
+    c['regist_status']['value'] = REGIST_STATUS['register_grant']
+    c['register_redirect_token']['value'] = register_redirect_token
+    ##c['regist_redirect_url']['value'] = url
+    context = RequestContext(request, c)
+    return render_to_response("regist_owner_grant.html", context)
+
+
+####
+@login_required
+def method_register_grant(request, regist_callback_me):
+    # it must pass a user_token here, it should be checked when user have finally agreed. it should be saved in some place. 
     print request.REQUEST
-    return HttpResponse("hello grant")
+    return HttpResponse('hello')

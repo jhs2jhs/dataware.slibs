@@ -96,6 +96,7 @@ class Registration(models.Model):
     registrant_request_reminder = models_type_reminder()
     registrant_request_user_public = models_type_request_user_public() # not used at moment
     registrant_redirect_token = models_type_token()
+    registrant_grant_user_token = models_type_token()
     registrant_access_token = models_type_token()
     registrant_access_validate = models_type_validate_code()
 
@@ -105,6 +106,7 @@ class Registration(models.Model):
     register_request_reminder = models_type_reminder()
     register_request_user_public = models_type_request_user_public() # not used at moment
     register_redirect_token = models_type_token()
+    register_grant_user_token = models_type_token()
     register_access_token = models_type_token()
     register_access_validate = models_type_validate_code()
 
