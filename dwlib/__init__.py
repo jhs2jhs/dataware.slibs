@@ -16,7 +16,12 @@ class url_keys(object):
     registrant_init_action = "REGISTRANT_INIT_ACTION"#
     registrant_init_action_generate = "Generate"#
     registrant_init_action_request = "Request"#
-    regist_redirect_url = "regist_redirect_url"
+
+    regist_redirect_url = "REGIST_REDIRECT_URL"
+
+    regist_request_action = 'REGIST_REQUEST_ACTION'
+    regist_request_action_request= 'Request'
+
     regist_redirect_action = 'regist_redirect_action'
     regist_redirect_action_redirect = 'Redirect'
     regist_redirect_action_login_redirect = 'Login&Redirect'
@@ -105,8 +110,8 @@ def token_create(other_callback, type_desc):# may need to add user as a unique p
     token = signature_create(key)
     return token
 
-def token_create_user(other_callback, type_desc, user_id):
-    param = {'start':str(datetime.now()), 'type_desc':type_desc, 'user_id':user_id}
+def token_create_user(other_callback, my_callback, type_desc, user_id):
+    param = {'other_callback':other_callback, "my_callback":my_callback, 'start':str(datetime.now()), 'type_desc':type_desc, 'user_id':user_id}
     url_param = urlencode(param)
     key = '%s?%s'%(other_callback, param)
     token = signature_create(key)
@@ -148,11 +153,16 @@ def error_response(type, params):
         return HttpResponseBadRequest('You did not provide correct value for every required paramters')
 
 def check_compulsory(lists):
-    miss = False
+    right = True
     for l in lists:
-        if l == None or l == '':
+        if l == None or l.strip() == '':
+            print l
             return False
     return True
+
+def check_choice(choices, choice):
+    return choice in choices.values()
+        
 
 def find_key_by_value(tuples, value):
     key = [k for (k, v) in tuples if v == value]

@@ -1,0 +1,29 @@
+{% extends "./base.html" %}
+
+{% block content %}
+
+<br><br>
+Attention: the page to request may not exist if the callback URL you give is not correct 
+
+<br>
+
+<form method="post" action="{{ regist_redirect_url.value }}">
+{% csrf_token %}
+<table>
+<tr>
+  <th>URL</th>
+  <th>Action</th>
+</tr>
+<tr>
+  <td><textarea rows="10" cols="50"><a href="{{ regist_redirect_url.value }}">{{ regist_redirect_url.value }}</a></textarea></td>
+  <td>
+    <input type="submit" name="{{ regist_request_action.label }}" value="{{ regist_request_action.request }}" />
+  </td>
+</tr>
+</table>
+<input type="hidden" name="{{ regist_status.label }}" value="{{ regist_status.value }}" />
+</form>
+
+
+{% endblock %}
+

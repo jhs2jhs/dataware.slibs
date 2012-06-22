@@ -23,9 +23,9 @@ Mutual registration with resource server
   <td><input type="text" name="{{ register_callback.label }}" value="{{ register_callback.value }}" /></td>
   <td><input type="text" name="{{ registrant_request_scope.label }}" value="{{ registrant_request_scope.value }}" /></td>
   <td><input type="text" name="{{ registrant_request_reminder.label }}" value="{{ registrant_request_reminder.value }}" /></td>
-  <td><input type="text" name="{{ register_request_user_public.label }}" value="{{ register_request_user_public.value }}" /></td>
+  <td><input type="text" name="{{ registrant_request_user_public.label }}" value="{{ registrant_request_user_public.value }}" /></td>
   <td>
-    <input type="checkbox" name="{{ regist_type.label }}" value="{{ regist_type.mutual }}" > {{ regist_type.mutual }} <br>
+    <input type="checkbox" name="{{ regist_type.label }}" value="{{ regist_type.mutual }}" checked="checked"> {{ regist_type.mutual }} <br>
     <input type="checkbox" name="{{ regist_type.label }}" value="{{ regist_type.one_way }}" > {{ regist_type.one_way }} <br>
   </td>
   <td><input type="submit" name="{{ regist_init_action.label }}" value="{{ regist_init_action.generate }}" /></td>
