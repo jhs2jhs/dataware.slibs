@@ -77,6 +77,14 @@ def get_context_base_regist():
             'label': url_keys.regist_request_action,
             'request': url_keys.regist_request_action_request,
             },
+        'regist_redirect_action':{
+            'label': url_keys.regist_redirect_action,
+            'login_redirect': url_keys.regist_redirect_action_login_redirect,
+            'redirect': url_keys.regist_redirect_action_redirect,
+            'grant': url_keys.regist_redirect_action_grant,
+            'modify_scope': url_keys.regist_redirect_action_modify_scope,
+            'wrong_user': url_keys.regist_redirect_action_wrong_user, # I remember it is not wrong user, should be worng reminder, etc??
+            },
         'register_callback':{
             'label': url_keys.regist_callback,
             'value': '',
@@ -91,6 +99,10 @@ def get_context_base_regist():
             },
         'registrant_request_user_public': {
             'label': url_keys.registrant_request_user_public,
+            'value': '',
+            },
+        "register_redirect_token":{
+            'label': url_keys.register_redirect_token,
             'value': '',
             },
         }
@@ -159,6 +171,57 @@ def method_registrant_request(request, regist_callback_me):
     ##
     c = get_context_base_regist()
     c['regist_redirect_url']['value'] = url
-    c['regist_status']['value'] = REGIST_STATUS['register_owner_redirect']
+    c['regist_status']['value'] = REGIST_STATUS['register_owner_redirect'] # do I need to pass it in?
     context = RequestContext(request, c)
     return render_to_response('registrant_request.html', context)
+
+####
+def method_register_owner_redirect(request, regist_callback_me):
+    # check whether user has login in or not
+    registrant_callback = request_get(request.REQUEST, url_keys.regist_callback)
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
+    registrant_request_scope = request_get(request.REQUEST, url_keys.registrant_request_scope) # may check it is in scope or not
+    registrant_request_reminder = request_get(request.REQUEST, url_keys.registrant_request_reminder)
+    registrant_request_user_public = request_get(request.REQUEST, url_keys.registrant_request_user_public) # may not be compulsory
+    #print register_callback, regist_type, registrant_request_scope, registrant_request_reminder, registrant_request_user_public
+    if (check_compulsory((registrant_callback, regist_type, registrant_request_token, registrant_request_scope, registrant_request_reminder))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    ##
+    register_redirect_token = dwlib.token_create(registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
+    ##
+    regist_type_key = find_key_by_value_regist_type(regist_type)
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_owner_redirect'])
+    obj, created = Registration.objects.get_or_create(
+        regist_type=regist_type_key, 
+        regist_status=regist_status_key, 
+        registrant_request_token=registrant_request_token, 
+        registrant_request_scope=registrant_request_scope, 
+        registrant_callback=registrant_callback, 
+        register_callback=regist_callback_me, 
+        registrant_request_reminder=registrant_request_reminder, 
+        registrant_request_user_public=registrant_request_user_public,
+        register_redirect_token=register_redirect_token)
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['register_owner_grant'],
+        url_keys.regist_type: regist_type,
+        url_keys.register_redirect_token:register_redirect_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(regist_callback_me, url_params)
+    ##
+    c = get_context_base_regist()
+    c['register_redirect_token']['value'] = register_redirect_token
+    c['regist_redirect_url']['value'] = url
+    c['regist_status']['value'] = REGIST_STATUS['register_owner_grant'] # do I need to pass it in?
+    context = RequestContext(request, c)
+    return render_to_response("regist_owner_redirect.html", context)
+
+
+####
+def method_register_owner_grant(request, regist_callback_me):
+    print request.REQUEST
+    return HttpResponse("hello grant")

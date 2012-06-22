@@ -28,6 +28,7 @@ class url_keys(object):
     regist_redirect_action_grant = "Grant_Permission"
     regist_redirect_action_modify_scope = "Modify_Request_Scope"
     regist_redirect_action_wrong_user = "Wrong_User"
+
     register_request_action = 'REGISTER_REQUEST_ACTION'
     register_request_action_request = 'Request'
     registrant_request_action = "REGISTRANT_REQUEST_ACTION"
@@ -103,8 +104,8 @@ def signature_create(key):
     m.update(key)
     return m.hexdigest()
 
-def token_create(other_callback, type_desc):# may need to add user as a unique party
-    param = {'start':str(datetime.now()), "type":type_desc}
+def token_create(other_callback, my_callback, type_desc):# may need to add user as a unique party
+    param = {'other_callback':other_callback, "my_callback":my_callback, 'start':str(datetime.now()), "type":type_desc}
     url_param = urlencode(param)
     key = '%s?%s'%(other_callback, param)
     token = signature_create(key)
