@@ -37,6 +37,7 @@ def get_context_base_regist():
             'grant': url_keys.regist_redirect_action_grant,
             'modify_scope': url_keys.regist_redirect_action_modify_scope,
             'wrong_user': url_keys.regist_redirect_action_wrong_user, # I remember it is not wrong user, should be worng reminder, etc??
+            'confirm': url_keys.regist_redirect_action_confirm,
             },
         'regist_grant_user_token':{
             'label': url_keys.regist_grant_user_token,

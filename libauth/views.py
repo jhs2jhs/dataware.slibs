@@ -249,6 +249,8 @@ def method_register_grant(request, regist_callback_me):
     registration.register_access_validate = register_access_validate
     registration.register_request_token = register_request_token
     registration.register_request_scope = register_request_scope
+    registration.register_request_reminder = register_request_reminder
+    registration.register_request_user_public = register_request_user_public
     registration.save()
     ##
     params = {
@@ -265,7 +267,6 @@ def method_register_grant(request, regist_callback_me):
         }
     url_params = dwlib.urlencode(params)
     url = '%s?%s'%(registration.registrant_callback, url_params)
-    print url
     ##
     c = get_context_base_regist()
     c['registrant_callback']['value'] = registration.registrant_callback
@@ -375,6 +376,7 @@ def method_registrant_owner_grant(request, regist_callback_me):
         }
     url_params = dwlib.urlencode(params)
     url = '%s?%s'%(regist_callback_me, url_params)
+    print url
     ##
     c = get_context_base_regist()
     c['regist_callback']['value'] = registration.register_callback
@@ -393,7 +395,57 @@ def method_registrant_owner_grant(request, regist_callback_me):
 ####
 @login_required
 def method_registrant_confirm(request, regist_callback_me):
-    return HttpResponse('hello confirm')
+    print request.REQUEST
+    user = request.user
+    registrant_redirect_token = request_get(request.REQUEST, url_keys.registrant_redirect_token)
+    registrant_grant_user_token = request_get(request.REQUEST, url_keys.regist_grant_user_token)
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    print regist_type, registrant_redirect_token, registrant_grant_user_token
+    print url_keys.regist_grant_user_token
+    if (check_compulsory((regist_type, registrant_redirect_token, registrant_grant_user_token))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    try:
+        registration = Registration.objects.get(registrant_redirect_token=registrant_redirect_token, registrant_grant_user_token=registrant_grant_user_token)
+    except ObjectDoesNotExist:
+        return error_response(5, ())
+    if registration.user != user:
+        return error_response(6, ())
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm'])
+    registration.regist_status = regist_status_key
+    registration.save()
+    ##
+    registrant_access_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['access'], user)
+    registrant_access_validate = registration.register_request_scope #TODO need to expand here, enable to edit here
+    registration.registrant_access_token = registrant_access_token
+    registration.registrant_access_validate = registrant_access_validate
+    registration.save()
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['finish'], #if mutual, it can come to register,etc???
+        url_keys.regist_type: regist_type,
+        url_keys.regist_callback: regist_callback_me,
+        url_keys.registrant_access_token:registrant_access_token,
+        url_keys.registrant_access_validate: registrant_access_validate,
+        url_keys.register_access_token: registration.register_access_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(registration.register_callback, url_params)
+    ##
+    c = get_context_base_regist()
+    c['register_callback']['value'] = registration.register_callback
+    c['register_request_token']['value'] = registration.register_request_token
+    c['register_request_scope']['value'] = registration.register_request_scope
+    c['register_request_reminder']['value'] = registration.register_request_reminder
+    c['register_request_user_public']['value'] = registration.register_request_user_public
+    c['registrant_access_token']['value'] = registrant_access_token
+    c['registrant_access_validate']['value'] = registrant_access_validate
+    c['regist_status']['value'] = REGIST_STATUS['finish']
+    c['regist_redirect_url']['value'] = url
+    c['regist_type']['value'] = regist_type
+    context = RequestContext(request, c)
+    return render_to_response("regist_confirm.html", context) #TODO how user can change their scope, and reminder, and user public information here. 
     
     
     

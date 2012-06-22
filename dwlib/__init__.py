@@ -28,6 +28,7 @@ class url_keys(object):
     regist_redirect_action_grant = "Grant_Permission"
     regist_redirect_action_modify_scope = "Modify_Request_Scope"
     regist_redirect_action_wrong_user = "Wrong_User"
+    regist_redirect_action_confirm = 'Confirm'
     
     regist_request_token = "REGIST_REQUEST_TOKEN"
     regist_request_scope = "REGIST_REQUEST_SCOPE"
