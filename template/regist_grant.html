@@ -1,6 +1,6 @@
-{% extends "./base.html" %}
+{% extends "./base_regist.html" %}
 
-{% block content %}
+{% block regist %}
 
 <form method="post" action=" {{ regist_redirect_url.value }}">
 <input type="hidden" name="{{ regist_status.label }}" value="{{ regist_status.value }}" />

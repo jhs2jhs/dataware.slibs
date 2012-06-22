@@ -137,7 +137,7 @@ def method_register_owner_redirect(request, regist_callback_me):
     try:
         registration = Registration.objects.get(registrant_request_token=registrant_request_token)
         # check whether the token is out of request stage
-        if registration.regist_status > find_key_by_value_regist_status(REGIST_STATUS['register_owner_grant']):
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['register_grant']):
             return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
         register_redirect_token = registration.register_redirect_token # use the existing redirect token if it is still available, try to keep one request_token should only have one redirect_value
     except ObjectDoesNotExist:
@@ -154,7 +154,7 @@ def method_register_owner_redirect(request, regist_callback_me):
             register_callback=regist_callback_me, 
             registrant_request_reminder=registrant_request_reminder, 
             registrant_request_user_public=registrant_request_user_public,
-            regist_redirect_token=register_redirect_token)
+            register_redirect_token=register_redirect_token)
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['register_owner_grant'],
@@ -187,7 +187,7 @@ def method_register_owner_grant(request, regist_callback_me):
     ## # need to check whether a redirect token is expired or not
     try:
         registration = Registration.objects.get(register_redirect_token=register_redirect_token)
-        if registration.regist_status > find_key_by_value_regist_status(REGIST_STATUS['register_owner_grant']): # if this token is too old
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['register_grant']): # if this token is too old
             return error_response(7, (url_keys.regist_redirect_token, register_redirect_token))
     except ObjectDoesNotExist:
         return error_response(3, (url_keys.register_redirect_token, register_redirect_token))
@@ -240,8 +240,8 @@ def method_register_grant(request, regist_callback_me):
     ##
     try:
         registration = Registration.objects.get(register_redirect_token=register_redirect_token, register_grant_user_token=register_grant_user_token)
-        #if registration.regist_status > find_key_by_value_regist_status(REGIST_STATUS['register_owner_grant']): # if this token is too old
-        #    return error_response(7, (url_keys.regist_grant_user_token, register_grant_user_token))
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['register_grant']): # if this token is too old
+            return error_response(7, (url_keys.regist_grant_user_token, register_grant_user_token))
     except ObjectDoesNotExist:
         return error_response(5, ())
     if registration.user != user:
@@ -319,6 +319,10 @@ def method_registrant_owner_redirect(request, regist_callback_me):
         return error_response(2, (url_keys.regist_type, regist_type))
     try:
         registration = Registration.objects.get(registrant_request_token=registrant_request_token)
+        print registration.regist_status, find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm'])
+        print REGIST_STATUS_CHOICES  #####?????????? dict_to_choices is not working here
+        #if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # if this token is too old
+        #    return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
     except ObjectDoesNotExist:
         return error_response(3, (url_keys.registrant_request_token, registrant_request_token))
     if registration.user != user:
