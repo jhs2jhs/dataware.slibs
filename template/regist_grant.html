@@ -1,0 +1,40 @@
+{% extends "./base.html" %}
+
+{% block content %}
+
+<form method="post" action=" {{ regist_redirect_url.value }}">
+<input type="hidden" name="{{ regist_status.label }}" value="{{ regist_status.value }}" />
+<input type="hidden" name="{{ regist_type.label }}" value="{{ regist_type.value }}" />
+{% csrf_token %}
+<br>
+<div>
+<table>
+You granted this permission and waiting for confirmation returnning back:
+</tr>
+<tr><td>Access_token: {{ register_access_token.value }} </td></tr>
+<tr><td>Access_Validation: {{ register_access_validate.value }} </td></tr>
+<tr><td>Grant_User: {{ user.username }} </td></tr>
+<tr><td><textarea rows="10" cols="50">{{ regist_redirect_url.value }}</textarea> </td></tr>
+<tr><td><input type="submit" name="{{ regist_redirect_action.label }}" value="{{ regist_redirect_action.redirect }}" /></td></tr>
+</table>
+</div>
+</form>
+
+<br><br>
+
+{% if regist_type.value == "MUTUAL" %}
+<form method="post" action="{{ regist_request_url }}">
+<div>
+<table>
+It is a MUTUAL registration. You can request for access registration as well, please define your request for registration, it will send with your access permission to them:
+<tr><td> Request_Scope: <input type="text" name="{{ register_request_scope.label }}" value="{{ register_request_scope.value }}" /> </td></tr>
+<tr><td> Request_reminder: <input type="text" name="{{ register_request_reminder.value }}" value="{{ register_request_reminder.value }}" /></td></tr>
+<tr><td> Request_User_Public: <input type="text" name="{{ register_request_user_public.value }}" value="{{ register_request_user_public.value }}" /></td></tr>
+<tr> <td>  <input type="submit" name="{{ regist_request_action.label }}" value="{{ regist_request_action.request }}" /> </td></tr>
+</table>
+</div>
+</form>
+{% endif %}
+
+{% endblock %}
+

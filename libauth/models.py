@@ -76,6 +76,7 @@ TOKEN_TYPE = {
     'request':"REQUEST",
     'access':"ACCESS",
     'redirect':'REDIRECT',
+    'grant':'GRANT',
     }
     
 

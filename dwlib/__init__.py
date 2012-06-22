@@ -22,12 +22,14 @@ class url_keys(object):
     regist_request_action = 'REGIST_REQUEST_ACTION'
     regist_request_action_request= 'Request'
 
-    regist_redirect_action = 'regist_redirect_action'
+    regist_redirect_action = 'REGIST_REDIRECT_ACTION'
     regist_redirect_action_redirect = 'Redirect'
     regist_redirect_action_login_redirect = 'Login&Redirect'
     regist_redirect_action_grant = "Grant_Permission"
     regist_redirect_action_modify_scope = "Modify_Request_Scope"
     regist_redirect_action_wrong_user = "Wrong_User"
+    
+    regist_grant_user_token = 'REGIST_GRANT_USER_TOKEN'
 
     register_request_action = 'REGISTER_REQUEST_ACTION'
     register_request_action_request = 'Request'
@@ -152,6 +154,8 @@ def error_response(type, params):
         return HttpResponseBadRequest('Token (%s) is not expired with value (%s)'%params)
     if type == 5:
         return HttpResponseBadRequest('You did not provide correct value for every required paramters')
+    if type == 6:
+        return HttpResponseBadRequest('Incorrect User')
 
 def check_compulsory(lists):
     right = True

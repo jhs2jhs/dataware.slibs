@@ -1,4 +1,5 @@
 from models import *
+from options import get_context_base_regist
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
@@ -51,70 +52,6 @@ def regist_steps(regist_dealer, request):
     return error_response(2, (url_keys.regist_status, regist_status))
 
 
-def get_context_base_regist():
-    c = {
-        'regist_type':{
-            'label': url_keys.regist_type,
-            'catalog_resource': REGIST_TYPE['catalog_resource'],
-            'client_catalog': REGIST_TYPE['client_catalog'],
-            'mutual': REGIST_TYPE['mutual'],
-            'one_way': REGIST_TYPE['one_way'],
-            },
-        'regist_status':{
-            'label': url_keys.regist_status,
-            'value': '',
-            },
-        'regist_init_action': {
-            'label': url_keys.regist_init_action,
-            'request': url_keys.regist_init_action_request,
-            'generate': url_keys.regist_init_action_generate,
-            },
-        'regist_redirect_url': {
-            'label': url_keys.regist_redirect_url,
-            'value': '',
-            },
-        'regist_request_action': {
-            'label': url_keys.regist_request_action,
-            'request': url_keys.regist_request_action_request,
-            },
-        'regist_redirect_action':{
-            'label': url_keys.regist_redirect_action,
-            'login_redirect': url_keys.regist_redirect_action_login_redirect,
-            'redirect': url_keys.regist_redirect_action_redirect,
-            'grant': url_keys.regist_redirect_action_grant,
-            'modify_scope': url_keys.regist_redirect_action_modify_scope,
-            'wrong_user': url_keys.regist_redirect_action_wrong_user, # I remember it is not wrong user, should be worng reminder, etc??
-            },
-        'register_callback':{
-            'label': url_keys.regist_callback,
-            'value': '',
-            },
-        'registrant_request_scope':{
-            'label': url_keys.registrant_request_scope,
-            'value': '',
-            },
-        'registrant_request_reminder': {
-            'label': url_keys.registrant_request_reminder,
-            'value': '',
-            },
-        'registrant_request_user_public': {
-            'label': url_keys.registrant_request_user_public,
-            'value': '',
-            },
-        "register_redirect_token":{
-            'label': url_keys.register_redirect_token,
-            'value': '',
-            },
-        'registrant_callback': {
-            'label': url_keys.registrant_callback,
-            'value': '',
-            },
-        'registrant_request_token': {
-            'label': url_keys.registrant_request_token,
-            'value':'',
-            },
-        }
-    return c
 
 ##### method to call for each regist_steps
 ####
@@ -180,6 +117,7 @@ def method_registrant_request(request, regist_callback_me):
     c = get_context_base_regist()
     c['regist_redirect_url']['value'] = url
     c['regist_status']['value'] = REGIST_STATUS['register_owner_redirect'] # do I need to pass it in?
+    c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
     return render_to_response('registrant_request.html', context)
 
@@ -225,6 +163,7 @@ def method_register_owner_redirect(request, regist_callback_me):
     c['register_redirect_token']['value'] = register_redirect_token
     c['regist_redirect_url']['value'] = url
     c['regist_status']['value'] = REGIST_STATUS['register_owner_grant'] # do I need to pass it in?
+    c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
     return render_to_response("regist_owner_redirect.html", context)
 
@@ -240,8 +179,6 @@ def method_register_owner_grant(request, regist_callback_me):
     if (check_choice(REGIST_TYPE, regist_type)) == False:
         return error_response(2, (url_keys.regist_type, regist_type))
     ##
-    # I should have access token generate here, and have register_request_token generate in register grant page
-    ##
     try:
         registration = Registration.objects.get(register_redirect_token=register_redirect_token)
     except ObjectDoesNotExist:
@@ -251,6 +188,19 @@ def method_register_owner_grant(request, regist_callback_me):
     registration.user = user
     registration.save()
     ##
+    register_grant_user_token = dwlib.token_create_user(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
+    registration.register_grant_user_token = register_grant_user_token
+    registration.save()
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['register_grant'],
+        url_keys.regist_type: regist_type,
+        url_keys.register_redirect_token:register_redirect_token,
+        url_keys.regist_grant_user_token: register_grant_user_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(regist_callback_me, url_params)
+    ##
     c = get_context_base_regist()
     c['registrant_callback']['value'] = registration.registrant_callback
     c['registrant_request_token']['value'] = registration.registrant_request_token
@@ -259,7 +209,9 @@ def method_register_owner_grant(request, regist_callback_me):
     c['registrant_request_user_public']['value'] = registration.registrant_request_user_public
     c['regist_status']['value'] = REGIST_STATUS['register_grant']
     c['register_redirect_token']['value'] = register_redirect_token
-    ##c['regist_redirect_url']['value'] = url
+    c['regist_grant_user_token']['value'] = register_grant_user_token
+    c['regist_redirect_url']['value'] = url
+    c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
     return render_to_response("regist_owner_grant.html", context)
 
@@ -267,6 +219,68 @@ def method_register_owner_grant(request, regist_callback_me):
 ####
 @login_required
 def method_register_grant(request, regist_callback_me):
-    # it must pass a user_token here, it should be checked when user have finally agreed. it should be saved in some place. 
-    print request.REQUEST
-    return HttpResponse('hello')
+    #print request.REQUEST
+    user = request.user
+    register_redirect_token = request_get(request.REQUEST, url_keys.register_redirect_token)
+    register_grant_user_token = request_get(request.REQUEST, url_keys.regist_grant_user_token)
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    if (check_compulsory((regist_type, register_redirect_token, register_grant_user_token))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    ##
+    try:
+        registration = Registration.objects.get(register_redirect_token=register_redirect_token, register_grant_user_token=register_grant_user_token)
+    except ObjectDoesNotExist:
+        return error_response(5, ())
+    if registration.user != user:
+        return error_response(6, ())
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_grant'])
+    registration.regist_status = regist_status_key
+    registration.save()
+    ##
+    register_access_token = dwlib.token_create_user(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['access'], user)
+    register_access_validate = registration.registrant_request_scope #TODO need to expand here, enable to edit here
+    register_request_token = dwlib.token_create_user(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['request'], user)
+    register_request_scope = '' # need to dyanmic generated here, for example using javascript
+    register_request_reminder = registration.registrant_request_reminder ## may need to be changed
+    register_request_user_public = registration.registrant_request_user_public
+    registration.register_access_token = register_access_token
+    registration.register_access_validate = register_access_validate
+    registration.register_request_token = register_request_token
+    registration.register_request_scope = register_request_scope
+    registration.save()
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['registrant_owner_redirect'], #if mutual, it can come to register,etc???
+        url_keys.regist_type: regist_type,
+        url_keys.regist_callback: regist_callback_me,
+        url_keys.register_access_token:register_access_token,
+        url_keys.register_access_validate: register_access_validate,
+        url_keys.register_request_token: register_request_token,
+        url_keys.register_request_scope: register_request_scope,
+        url_keys.register_request_reminder: url_keys.register_request_reminder,
+        url_keys.register_request_user_public: url_keys.register_request_user_public,
+        url_keys.registrant_request_token: registration.registrant_request_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(registration.registrant_callback, url_params)
+    print url
+    ##
+    c = get_context_base_regist()
+    c['registrant_callback']['value'] = registration.registrant_callback
+    c['registrant_request_token']['value'] = registration.registrant_request_token
+    c['registrant_request_scope']['value'] = registration.registrant_request_scope
+    c['registrant_request_reminder']['value'] = registration.registrant_request_reminder
+    c['registrant_request_user_public']['value'] = registration.registrant_request_user_public
+    c['register_access_token']['value'] = register_access_token
+    c['register_access_validate']['value'] = register_access_validate
+    c['register_request_token']['value'] = register_request_token
+    c['register_request_scope']['value'] = register_request_token
+    c['register_request_reminder']['value'] = register_request_reminder
+    c['register_request_user_public']['value'] = register_request_user_public
+    c['regist_status']['value'] = REGIST_STATUS['registrant_owner_redirect']
+    c['regist_redirect_url']['value'] = url
+    c['regist_type']['value'] = regist_type
+    context = RequestContext(request, c)
+    return render_to_response("regist_grant.html", context) #TODO how user can change their scope, and reminder, and user public information here. 
