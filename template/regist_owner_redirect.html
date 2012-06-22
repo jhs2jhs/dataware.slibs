@@ -17,7 +17,7 @@ Redirect registration request to user in demand: <br>
   <td><textarea rows="10" cols="50">{{ regist_redirect_url.value }}</textarea></td>
   <td>
     {% if user.is_authenticated %}
-    You have login, want to grant:
+    You have login, want to grant:<br>
     <input type="submit" name="{{ regist_redirect_action.label }}" value="{{ regist_redirect_action.redirect }}" />
     {% else %}
     Login to identify yourself: <br>

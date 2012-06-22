@@ -90,5 +90,17 @@ def get_context_base_regist():
             'label': url_keys.registrant_request_token,
             'value':'',
             },
+        "registrant_redirect_token":{
+            'label': url_keys.registrant_redirect_token,
+            'value': '',
+            },
+        'registrant_access_token': {
+            'label': url_keys.registrant_access_token,
+            'value': '',
+            },
+        'registrant_access_validate': {
+            'label': url_keys.registrant_access_validate,
+            'value': '',
+            },
         }
     return c
