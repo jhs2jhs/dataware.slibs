@@ -17,6 +17,10 @@ def get_context_base_regist():
             'label': url_keys.regist_status,
             'value': '',
             },
+        'regist_status_current':{
+            'label':url_keys.regist_status_current,
+            'value':'',
+            },
         'regist_init_action': {
             'label': url_keys.regist_init_action,
             'request': url_keys.regist_init_action_request,

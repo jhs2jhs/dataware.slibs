@@ -64,11 +64,11 @@ def method_regist_init(request):
     ##
     c = get_context_base_regist()
     c['regist_status']['value'] = REGIST_STATUS['registrant_request']
+    c['regist_status_current']['value'] = REGIST_STATUS['init']
     c['register_callback']['value'] = register_callback
     c['registrant_request_reminder']['value'] = registrant_request_reminder
     c['registrant_request_scope']['value'] = registrant_request_scope
     c['registrant_request_user_public']['value'] = registrant_request_user_public
-    print c
     context = RequestContext(request, c)
     return render_to_response('regist_init.html', context)
 

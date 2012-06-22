@@ -95,7 +95,7 @@ class Registration(models.Model):
     registrant_request_token = models_type_token()
     registrant_request_scope = models_type_access_scope()
     registrant_request_reminder = models_type_reminder()
-    registrant_request_user_public = models_type_request_user_public() # not used at moment
+    registrant_request_user_public = models_type_request_user_public() # leave it as interface
     registrant_redirect_token = models_type_token()
     registrant_grant_user_token = models_type_token()
     registrant_access_token = models_type_token()

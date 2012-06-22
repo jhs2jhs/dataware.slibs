@@ -1,0 +1,15 @@
+{% extends "./base.html" %}
+
+
+{% block content %}
+<br>
+{% if regist_status_current.value %}
+<div>Service Registration Status: <a href="/faq">{{ regist_status_current.value }}</a></div>
+{% endif %}
+{% if regist_type.value %}
+<div>Service Registration Type: <a href="/faq">{{ regist_type.value }}</a></div>
+{% endif %}
+
+<div>{% block regist %}{% endblock %}</div>
+
+{% endblock %}

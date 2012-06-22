@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 class url_keys(object):
     # for each regist
     regist_status = 'REGIST_STATUS'
+    regist_status_current = 'REGIST_STATUS_CURRENT'
     regist_type = 'REGIST_TYPE'
     regist_callback = 'REGIST_CALLBACK'
     
