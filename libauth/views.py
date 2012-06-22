@@ -447,5 +447,27 @@ def method_registrant_confirm(request, regist_callback_me):
     context = RequestContext(request, c)
     return render_to_response("regist_confirm.html", context) #TODO how user can change their scope, and reminder, and user public information here. 
     
-    
+
+####
+def method_regist_finish(request):
+    register_access_token = request_get(request.REQUEST, url_keys.register_access_token)
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    if (check_compulsory((regist_type, register_access_token))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    try:
+        registration = Registration.objects.get(register_access_token=register_access_token)
+    except ObjectDoesNotExist:
+        return error_response(5, ())
+    registrant_access_token = request_get(request.REQUEST, url_keys.registrant_access_token)
+    registrant_access_validate = request_get(request.REQUEST, url_keys.registrant_access_validate)
+    ##
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['finish'])
+    registration.regist_status = regist_status_key
+    registration.registrant_access_token = registrant_access_token
+    registration.registrant_access_validate = registrant_access_validate
+    registration.save()
+    ##
+    return HttpResponse("Congruation, you has successfully regist and your access token is activated to use now")
     
