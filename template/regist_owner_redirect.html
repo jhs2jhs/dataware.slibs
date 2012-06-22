@@ -1,13 +1,14 @@
-{% extends "./base.html" %}
+{% extends "./base_regist.html" %}
 
-{% block content %}
+{% block regist %}
+<br>
+Redirect registration request to real user: <br>
+*You can pass this link to anyone you want.
 
 <form method="post" action="{{ regist_redirect_url.value }}">
 <input type="hidden" name="{{ regist_redirect_token.label }}" value="{{ regist_redirect_token.value }}" />
 <input type="hidden" name="{{ regist_status.label }}" value="{{ regist_status.value }}" />
 {% csrf_token %}
-Redirect registration request to user in demand: <br>
-*You can pass this link to anyone you want.
 <table>
 <tr>
   <th>URL</td>

@@ -158,11 +158,13 @@ def error_response(type, params):
     if type == 3:
         return HttpResponseBadRequest('Token (%s) is not exist with value (%s)'%params)
     if type == 4:
-        return HttpResponseBadRequest('Token (%s) is not expired with value (%s)'%params)
+        return HttpResponseBadRequest('Token (%s) is expired with value (%s)'%params)
     if type == 5:
         return HttpResponseBadRequest('You did not provide correct value for every required paramters')
     if type == 6:
         return HttpResponseBadRequest('Incorrect User')
+    if type == 7:
+        return HttpResponseBadRequest('Token (%s) has been used and can not be used any more with this value (%s)'%params)
 
 def check_compulsory(lists):
     right = True

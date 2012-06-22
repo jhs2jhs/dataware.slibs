@@ -115,7 +115,7 @@ def method_registrant_request(request, regist_callback_me):
     ##
     c = get_context_base_regist()
     c['regist_redirect_url']['value'] = url
-    c['regist_status']['value'] = REGIST_STATUS['register_owner_redirect'] # do I need to pass it in?
+    c['regist_status']['value'] = REGIST_STATUS['register_owner_redirect'] 
     c['regist_status_current']['value'] = REGIST_STATUS['registrant_request']
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
@@ -123,33 +123,38 @@ def method_registrant_request(request, regist_callback_me):
 
 ####
 def method_register_owner_redirect(request, regist_callback_me):
-    # check whether user has login in or not
     registrant_callback = request_get(request.REQUEST, url_keys.regist_callback)
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
-    registrant_request_scope = request_get(request.REQUEST, url_keys.registrant_request_scope) # may check it is in scope or not
+    registrant_request_scope = request_get(request.REQUEST, url_keys.registrant_request_scope) # TODO:may check it is in scope or not
     registrant_request_reminder = request_get(request.REQUEST, url_keys.registrant_request_reminder)
-    registrant_request_user_public = request_get(request.REQUEST, url_keys.registrant_request_user_public) # may not be compulsory TODO it is requesd to a specific user, it can add to use later. 
-    #print register_callback, regist_type, registrant_request_scope, registrant_request_reminder, registrant_request_user_public
+    registrant_request_user_public = request_get(request.REQUEST, url_keys.registrant_request_user_public) # TODO: if it is requesting to a specific user, it need to check whether this user is login or exist, however each individual case may have different implementaiton. It could just be ignored for generation.  
     if (check_compulsory((registrant_callback, regist_type, registrant_request_token, registrant_request_scope, registrant_request_reminder))) == False:
         return error_response(5, ())
     if (check_choice(REGIST_TYPE, regist_type)) == False:
         return error_response(2, (url_keys.regist_type, regist_type))
-    ##
-    register_redirect_token = dwlib.token_create(registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
-    ##
-    regist_type_key = find_key_by_value_regist_type(regist_type)
-    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_owner_redirect'])
-    obj, created = Registration.objects.get_or_create(
-        regist_type=regist_type_key, 
-        regist_status=regist_status_key, 
-        registrant_request_token=registrant_request_token, 
-        registrant_request_scope=registrant_request_scope, 
-        registrant_callback=registrant_callback, 
-        register_callback=regist_callback_me, 
-        registrant_request_reminder=registrant_request_reminder, 
-        registrant_request_user_public=registrant_request_user_public,
-        register_redirect_token=register_redirect_token)
+    ## 
+    try:
+        registration = Registration.objects.get(registrant_request_token=registrant_request_token)
+        # check whether the token is out of request stage
+        if registration.regist_status > find_key_by_value_regist_status(REGIST_STATUS['register_grant']):
+            return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
+        register_redirect_token = registration.register_redirect_token # use the existing redirect token if it is still available, try to keep one request_token should only have one redirect_value
+    except ObjectDoesNotExist:
+        # if the redirect_token is not generate before
+        register_redirect_token = dwlib.token_create(registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
+        regist_type_key = find_key_by_value_regist_type(regist_type)
+        regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['register_owner_redirect'])
+        obj, created = Registration.objects.get_or_create(
+            regist_type=regist_type_key, 
+            regist_status=regist_status_key, 
+            registrant_request_token=registrant_request_token, 
+            registrant_request_scope=registrant_request_scope, 
+            registrant_callback=registrant_callback, 
+            register_callback=regist_callback_me, 
+            registrant_request_reminder=registrant_request_reminder, 
+            registrant_request_user_public=registrant_request_user_public,
+            register_redirect_token=register_redirect_token)
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['register_owner_grant'],
@@ -162,7 +167,8 @@ def method_register_owner_redirect(request, regist_callback_me):
     c = get_context_base_regist()
     c['regist_redirect_token']['value'] = register_redirect_token
     c['regist_redirect_url']['value'] = url
-    c['regist_status']['value'] = REGIST_STATUS['register_owner_grant'] # do I need to pass it in?
+    c['regist_status']['value'] = REGIST_STATUS['register_owner_grant'] 
+    c['regist_status_current']['value'] = REGIST_STATUS['register_owner_redirect']
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
     return render_to_response("regist_owner_redirect.html", context)
@@ -178,7 +184,7 @@ def method_register_owner_grant(request, regist_callback_me):
         return error_response(5, ())
     if (check_choice(REGIST_TYPE, regist_type)) == False:
         return error_response(2, (url_keys.regist_type, regist_type))
-    ##
+    ## # need to check whether a redirect token is expired or not
     try:
         registration = Registration.objects.get(register_redirect_token=register_redirect_token)
     except ObjectDoesNotExist:
