@@ -29,6 +29,11 @@ class url_keys(object):
     regist_redirect_action_modify_scope = "Modify_Request_Scope"
     regist_redirect_action_wrong_user = "Wrong_User"
     
+    regist_request_token = "REGIST_REQUEST_TOKEN"
+    regist_request_scope = "REGIST_REQUEST_SCOPE"
+    regist_request_reminder = "REGIST_REQUEST_REMINDER"
+    regist_request_user_public = "REGIST_REQUEST_USER_PUBLIC"
+    regist_redirect_token = "REGIST_REDIRECT_TOKEN"
     regist_grant_user_token = 'REGIST_GRANT_USER_TOKEN'
 
     register_request_action = 'REGISTER_REQUEST_ACTION'

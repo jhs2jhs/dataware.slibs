@@ -160,7 +160,7 @@ def method_register_owner_redirect(request, regist_callback_me):
     url = '%s?%s'%(regist_callback_me, url_params)
     ##
     c = get_context_base_regist()
-    c['register_redirect_token']['value'] = register_redirect_token
+    c['regist_redirect_token']['value'] = register_redirect_token
     c['regist_redirect_url']['value'] = url
     c['regist_status']['value'] = REGIST_STATUS['register_owner_grant'] # do I need to pass it in?
     c['regist_type']['value'] = regist_type
@@ -202,11 +202,11 @@ def method_register_owner_grant(request, regist_callback_me):
     url = '%s?%s'%(regist_callback_me, url_params)
     ##
     c = get_context_base_regist()
-    c['registrant_callback']['value'] = registration.registrant_callback
-    c['registrant_request_token']['value'] = registration.registrant_request_token
-    c['registrant_request_scope']['value'] = registration.registrant_request_scope
-    c['registrant_request_reminder']['value'] = registration.registrant_request_reminder
-    c['registrant_request_user_public']['value'] = registration.registrant_request_user_public
+    c['regist_callback']['value'] = registration.registrant_callback
+    c['regist_request_token']['value'] = registration.registrant_request_token
+    c['regist_request_scope']['value'] = registration.registrant_request_scope
+    c['regist_request_reminder']['value'] = registration.registrant_request_reminder
+    c['regist_request_user_public']['value'] = registration.registrant_request_user_public
     c['regist_status']['value'] = REGIST_STATUS['register_grant']
     c['register_redirect_token']['value'] = register_redirect_token
     c['regist_grant_user_token']['value'] = register_grant_user_token
@@ -333,7 +333,7 @@ def method_registrant_owner_redirect(request, regist_callback_me):
     url = '%s?%s'%(regist_callback_me, url_params)
     ##
     c = get_context_base_regist()
-    c['registrant_redirect_token']['value'] = registrant_redirect_token
+    c['regist_redirect_token']['value'] = registrant_redirect_token
     c['regist_redirect_url']['value'] = url
     c['regist_status']['value'] = REGIST_STATUS['registrant_owner_grant'] # do I need to pass it in?
     c['regist_type']['value'] = regist_type
@@ -341,5 +341,59 @@ def method_registrant_owner_redirect(request, regist_callback_me):
     print c
     return render_to_response("regist_owner_redirect.html", context)
    
+
+####
+@login_required
+def method_registrant_owner_grant(request, regist_callback_me):
+    user = request.user
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    registrant_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
+    if (check_compulsory((regist_type, registrant_redirect_token))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    ##
+    try:
+        registration = Registration.objects.get(registrant_redirect_token=registrant_redirect_token)
+    except ObjectDoesNotExist:
+        return error_response(3, (url_keys.register_redirect_token, register_redirect_token))
+    if registration.user != user:
+        return error_response(6, ())
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['registrant_owner_grant'])
+    registration.regist_status = regist_status_key
+    registration.save()
+    ##
+    registrant_grant_user_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
+    registration.registrant_grant_user_token = registrant_grant_user_token
+    registration.save()
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['registrant_confirm'],
+        url_keys.regist_type: regist_type,
+        url_keys.registrant_redirect_token:registrant_redirect_token,
+        url_keys.regist_grant_user_token: registrant_grant_user_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(regist_callback_me, url_params)
+    ##
+    c = get_context_base_regist()
+    c['regist_callback']['value'] = registration.register_callback
+    c['regist_request_token']['value'] = registration.register_request_token
+    c['regist_request_scope']['value'] = registration.register_request_scope
+    c['regist_request_reminder']['value'] = registration.register_request_reminder
+    c['regist_request_user_public']['value'] = registration.register_request_user_public
+    c['regist_status']['value'] = REGIST_STATUS['registrant_confirm']
+    c['registrant_redirect_token']['value'] = registrant_redirect_token
+    c['regist_grant_user_token']['value'] = registrant_grant_user_token
+    c['regist_redirect_url']['value'] = url
+    c['regist_type']['value'] = regist_type
+    context = RequestContext(request, c)
+    return render_to_response("regist_owner_grant.html", context)
+
+####
+@login_required
+def method_registrant_confirm(request, regist_callback_me):
+    return HttpResponse('hello confirm')
+    
     
     

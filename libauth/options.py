@@ -2,6 +2,10 @@ from models import *
 
 def get_context_base_regist():
     c = {
+        'regist_callback':{
+            'label': url_keys.regist_callback,
+            'value': '',
+            },
         'regist_type':{
             'label': url_keys.regist_type,
             'catalog_resource': REGIST_TYPE['catalog_resource'],
@@ -37,6 +41,26 @@ def get_context_base_regist():
         'regist_grant_user_token':{
             'label': url_keys.regist_grant_user_token,
             'value':'',
+            },
+         'regist_request_scope': {
+            'label': url_keys.regist_request_scope,
+            'value': '',
+            },
+        'regist_request_token': {
+            'label': url_keys.regist_request_token,
+            'value': '',
+            },
+        'regist_request_reminder': {
+            'label': url_keys.regist_request_reminder,
+            'value': '',
+            },
+        'regist_request_user_public': {
+            'label': url_keys.regist_request_user_public,
+            'value': '',
+            },
+        'regist_redirect_token':{
+            'label':url_keys.regist_redirect_token,
+            'value': '',
             },
         'register_callback':{
             'label': url_keys.regist_callback,
