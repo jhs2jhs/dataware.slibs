@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseBadRequest
 from dwlib import url_keys, request_get, error_response, find_key_by_value
+from collections import OrderedDict
 
 def models_type_callback():
     return models.CharField(max_length=256, null=True)
@@ -51,6 +52,7 @@ REGIST_TYPE = {
     }
 REGIST_TYPE_CHOICES = dict_to_choices(REGIST_TYPE)
 
+'''
 REGIST_STATUS = {
     'not_start':'NOT_START',
     'init':'INIT',
@@ -62,7 +64,18 @@ REGIST_STATUS = {
     'registrant_owner_grant':'REGISTRANT_OWNER_GRANT',
     'registrant_confirm':'REGISTRANT_CONFIRM',
     'finish':'FINISH',
-    }
+    }'''
+REGIST_STATUS = OrderedDict()
+REGIST_STATUS['not_start'] = 'NOT_START'
+REGIST_STATUS['init'] = 'INIT'
+REGIST_STATUS['registrant_request'] = 'REGISTRANT_REQUEST'
+REGIST_STATUS['register_owner_redirect'] = 'REGISTER_OWNER_REDIRECT'
+REGIST_STATUS['register_owner_grant'] = 'REGISTER_OWNER_GRANT'
+REGIST_STATUS['register_grant'] = 'REGISTER_GRANT'
+REGIST_STATUS['registrant_owner_redirect'] = 'REGISTRANT_OWNER_REDIRECT'
+REGIST_STATUS['registrant_owner_grant'] = 'REGISTRANT_OWNER_GRANT'
+REGIST_STATUS['registrant_confirm'] = 'REGISTRANT_CONFIRM'
+REGIST_STATUS['finish'] = 'FINISH'
 REGIST_STATUS_CHOICES = dict_to_choices(REGIST_STATUS)
 
 REQUEST_MEDIA = {

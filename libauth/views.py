@@ -319,10 +319,8 @@ def method_registrant_owner_redirect(request, regist_callback_me):
         return error_response(2, (url_keys.regist_type, regist_type))
     try:
         registration = Registration.objects.get(registrant_request_token=registrant_request_token)
-        print registration.regist_status, find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm'])
-        print REGIST_STATUS_CHOICES  #####?????????? dict_to_choices is not working here
-        #if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # if this token is too old
-        #    return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # if this token is too old
+            return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
     except ObjectDoesNotExist:
         return error_response(3, (url_keys.registrant_request_token, registrant_request_token))
     if registration.user != user:
@@ -361,7 +359,6 @@ def method_registrant_owner_redirect(request, regist_callback_me):
     c['regist_status']['value'] = REGIST_STATUS['registrant_owner_grant'] # do I need to pass it in?
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
-    print c
     return render_to_response("regist_owner_redirect.html", context)
    
 
