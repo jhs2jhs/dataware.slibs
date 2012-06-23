@@ -491,6 +491,7 @@ def method_regist_finish(request):
         return error_response(2, (url_keys.regist_type, regist_type))
     try:
         registration = Registration.objects.get(register_access_token=register_access_token)
+        #TODO should I check whether this registration is finish or not?, to update access_token, it should use another way to update? not in registration, otherwise any one who got this access_token, can update the access_token, because this access_token, can distribute it out. 
     except ObjectDoesNotExist:
         return error_response(5, ())
     registrant_access_token = request_get(request.REQUEST, url_keys.registrant_access_token)
