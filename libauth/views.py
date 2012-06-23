@@ -330,33 +330,37 @@ def method_registrant_owner_redirect(request, regist_callback_me):
     register_request_scope = request_get(request.REQUEST, url_keys.register_request_scope)
     register_request_reminder = request_get(request.REQUEST, url_keys.register_request_reminder)
     register_request_user_public = request_get(request.REQUEST, url_keys.register_request_user_public)
-    ##
-    registrant_redirect_token = dwlib.token_create(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
-    ##
-    regist_type_key = find_key_by_value_regist_type(regist_type)
-    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['registrant_owner_redirect'])
-    registration.regist_status=regist_status_key
     registration.register_access_token = register_access_token
     registration.register_access_validate = register_access_validate
     registration.register_request_token = register_request_token
     registration.register_request_scope = register_request_scope
     registration.register_request_reminder = register_request_reminder
     registration.register_request_user_public = register_request_user_public ## look like it not need here
-    registration.registrant_redirect_token = registrant_redirect_token
+    registration.save()
+    ##
+    if registration.registrant_redirect_token == None or registration.registrant_redirect_token == '':
+        registrant_redirect_token = dwlib.token_create(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
+        registration.registrant_redirect_token = registrant_redirect_token
+        registration.save()
+    ##
+    regist_type_key = find_key_by_value_regist_type(regist_type)
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['registrant_owner_redirect'])
+    registration.regist_status=regist_status_key
     registration.save()
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['registrant_owner_grant'],
         url_keys.regist_type: regist_type,
-        url_keys.register_redirect_token:registrant_redirect_token,
+        url_keys.register_redirect_token:registration.registrant_redirect_token,
         }
     url_params = dwlib.urlencode(params)
     url = '%s?%s'%(regist_callback_me, url_params)
     ##
     c = get_context_base_regist()
-    c['regist_redirect_token']['value'] = registrant_redirect_token
+    c['regist_redirect_token']['value'] = registration.registrant_redirect_token
     c['regist_redirect_url']['value'] = url
-    c['regist_status']['value'] = REGIST_STATUS['registrant_owner_grant'] # do I need to pass it in?
+    c['regist_status']['value'] = REGIST_STATUS['registrant_owner_grant'] # 
+    c['regist_status_current']['value'] = REGIST_STATUS['registrant_owner_redirect']
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
     return render_to_response("regist_owner_redirect.html", context)
