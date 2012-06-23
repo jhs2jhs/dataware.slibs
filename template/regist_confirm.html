@@ -11,8 +11,9 @@
 <table>
 You granted this permission and and confirm you receive the grant to your request:
 </tr>
-<tr><td>Access_token: {{ register_access_token.value }} </td></tr>
-<tr><td>Access_Validation: {{ register_access_validate.value }} </td></tr>
+<tr><td>Access_token: </td></tr>
+<tr><td><textarea rows="5" cols="50">{{ registrant_access_token.value }}</textarea></td></tr>
+<tr><td>Access_Validation: {{ registrant_access_validate.value }} </td></tr>
 <tr><td>Grant_User: {{ user.username }} </td></tr>
 <tr><td><textarea rows="10" cols="50">{{ regist_redirect_url.value }}</textarea> </td></tr>
 <tr><td><input type="submit" name="{{ regist_redirect_action.label }}" value="{{ regist_redirect_action.confirm }}" /></td></tr>

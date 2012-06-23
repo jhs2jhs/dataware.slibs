@@ -435,6 +435,8 @@ def method_registrant_confirm(request, regist_callback_me):
         return error_response(2, (url_keys.regist_type, regist_type))
     try:
         registration = Registration.objects.get(registrant_redirect_token=registrant_redirect_token, registrant_grant_user_token=registrant_grant_user_token)
+        #if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # TODO: whether it is > or >=
+        #    return error_response(7, (url_keys.regist_grant_user_token, registrant_grant_user_token))
     except ObjectDoesNotExist:
         return error_response(5, ())
     if registration.user != user:
@@ -443,18 +445,21 @@ def method_registrant_confirm(request, regist_callback_me):
     registration.regist_status = regist_status_key
     registration.save()
     ##
-    registrant_access_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['access'], user)
-    registrant_access_validate = registration.register_request_scope #TODO need to expand here, enable to edit here
-    registration.registrant_access_token = registrant_access_token
-    registration.registrant_access_validate = registrant_access_validate
-    registration.save()
+    if registration.registrant_access_token == None or registration.registrant_access_token == '':
+        registrant_access_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['access'], user)
+        registration.registrant_access_token = registrant_access_token
+        registration.save()
+    if registration.registrant_access_validate == None or registration.registrant_access_validate == '':
+        registrant_access_validate = registration.register_request_scope #TODO need to expand here, enable to edit here
+        registration.registrant_access_validate = registrant_access_validate
+        registration.save()
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['finish'], #if mutual, it can come to register,etc???
         url_keys.regist_type: regist_type,
         url_keys.regist_callback: regist_callback_me,
-        url_keys.registrant_access_token:registrant_access_token,
-        url_keys.registrant_access_validate: registrant_access_validate,
+        url_keys.registrant_access_token:registration.registrant_access_token,
+        url_keys.registrant_access_validate: registration.registrant_access_validate,
         url_keys.register_access_token: registration.register_access_token,
         }
     url_params = dwlib.urlencode(params)
@@ -466,9 +471,10 @@ def method_registrant_confirm(request, regist_callback_me):
     c['register_request_scope']['value'] = registration.register_request_scope
     c['register_request_reminder']['value'] = registration.register_request_reminder
     c['register_request_user_public']['value'] = registration.register_request_user_public
-    c['registrant_access_token']['value'] = registrant_access_token
-    c['registrant_access_validate']['value'] = registrant_access_validate
+    c['registrant_access_token']['value'] = registration.registrant_access_token
+    c['registrant_access_validate']['value'] = registration.registrant_access_validate
     c['regist_status']['value'] = REGIST_STATUS['finish']
+    c['regist_status_current']['value'] = REGIST_STATUS['registrant_confirm']
     c['regist_redirect_url']['value'] = url
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
