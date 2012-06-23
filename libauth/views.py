@@ -379,6 +379,8 @@ def method_registrant_owner_grant(request, regist_callback_me):
     ##
     try:
         registration = Registration.objects.get(registrant_redirect_token=registrant_redirect_token)
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # if this token is too old
+            return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
     except ObjectDoesNotExist:
         return error_response(3, (url_keys.register_redirect_token, register_redirect_token))
     if registration.user != user:
@@ -387,15 +389,16 @@ def method_registrant_owner_grant(request, regist_callback_me):
     registration.regist_status = regist_status_key
     registration.save()
     ##
-    registrant_grant_user_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
-    registration.registrant_grant_user_token = registrant_grant_user_token
-    registration.save()
+    if registration.registrant_grant_user_token == None or registration.registrant_grant_user_token == '':
+        registrant_grant_user_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
+        registration.registrant_grant_user_token = registrant_grant_user_token
+        registration.save()
     ##
     params = {
         url_keys.regist_status: REGIST_STATUS['registrant_confirm'],
         url_keys.regist_type: regist_type,
         url_keys.registrant_redirect_token:registrant_redirect_token,
-        url_keys.regist_grant_user_token: registrant_grant_user_token,
+        url_keys.regist_grant_user_token: registration.registrant_grant_user_token,
         }
     url_params = dwlib.urlencode(params)
     url = '%s?%s'%(regist_callback_me, url_params)
@@ -408,8 +411,9 @@ def method_registrant_owner_grant(request, regist_callback_me):
     c['regist_request_reminder']['value'] = registration.register_request_reminder
     c['regist_request_user_public']['value'] = registration.register_request_user_public
     c['regist_status']['value'] = REGIST_STATUS['registrant_confirm']
-    c['registrant_redirect_token']['value'] = registrant_redirect_token
-    c['regist_grant_user_token']['value'] = registrant_grant_user_token
+    c['regist_status_current']['value'] = REGIST_STATUS['registrant_owner_grant']
+    c['regist_redirect_token']['value'] = registrant_redirect_token
+    c['regist_grant_user_token']['value'] = registration.registrant_grant_user_token
     c['regist_redirect_url']['value'] = url
     c['regist_type']['value'] = regist_type
     context = RequestContext(request, c)
