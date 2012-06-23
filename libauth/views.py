@@ -262,10 +262,69 @@ def register_grant(request, regist_callback_me):
     context = RequestContext(request, c)
     return render_to_response("regist_grant.html", context)  
 
-
 ####
-@login_required
 def registrant_owner_redirect(request, regist_callback_me):
+    # check regist_type first here
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    if (check_compulsory((regist_type))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    if regist_type == REGIST_TYPE['one_way']:
+        return registrant_owner_redirect_one_way(request, regist_callback_me)
+    if regist_type == REGIST_TYPE['mutual']:
+        return registrant_owner_redirect_mutual(request, regist_callback_me)
+
+##
+@login_required
+def registrant_owner_redirect_one_way(request, regist_callback_me):
+    user = request.user
+    regist_type = request_get(request.REQUEST, url_keys.regist_type)
+    registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
+    register_access_token = request_get(request.REQUEST, url_keys.register_access_token)
+    register_access_validate = request_get(request.REQUEST, url_keys.register_access_validate)
+    if (check_compulsory((regist_type, registrant_request_token, register_access_token, register_access_validate))) == False:
+        return error_response(5, ())
+    if (check_choice(REGIST_TYPE, regist_type)) == False:
+        return error_response(2, (url_keys.regist_type, regist_type))
+    try:
+        registration = Registration.objects.get(registrant_request_token=registrant_request_token)
+        if registration.regist_status >= find_key_by_value_regist_status(REGIST_STATUS['registrant_confirm']): # if this token is too old
+            return error_response(7, (url_keys.registrant_request_token, registrant_request_token))
+    except ObjectDoesNotExist:
+        return error_response(3, (url_keys.registrant_request_token, registrant_request_token))
+    if registration.user != user:
+        return error_response(6, ())
+    ##
+    if registration.registrant_redirect_token == None or registration.registrant_redirect_token == '':
+        registrant_redirect_token = dwlib.token_create(registration.registrant_callback, regist_callback_me, TOKEN_TYPE['redirect'])
+        registration.registrant_redirect_token = registrant_redirect_token
+        registration.save()
+    if registration.registrant_grant_user_token == None or registration.registrant_grant_user_token == '':
+        registrant_grant_user_token = dwlib.token_create_user(registration.register_callback, regist_callback_me, TOKEN_TYPE['grant'], user)
+        registration.registrant_grant_user_token = registrant_grant_user_token
+        registration.save()
+    ##
+    regist_type_key = find_key_by_value_regist_type(regist_type)
+    regist_status_key = find_key_by_value_regist_status(REGIST_STATUS['registrant_owner_redirect'])
+    registration.regist_status=regist_status_key
+    registration.save()
+    ##
+    params = {
+        url_keys.regist_status: REGIST_STATUS['registrant_confirm'],
+        url_keys.regist_type: regist_type,
+        url_keys.regist_redirect_token:registration.registrant_redirect_token,
+        url_keys.regist_grant_user_token:registration.registrant_grant_user_token,
+        }
+    url_params = dwlib.urlencode(params)
+    url = '%s?%s'%(regist_callback_me, url_params)
+    ##
+    return HttpResponseRedirect(url)
+
+
+##
+@login_required
+def registrant_owner_redirect_mutual(request, regist_callback_me):
     user = request.user
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
@@ -355,7 +414,7 @@ def registrant_owner_grant(request, regist_callback_me):
     params = {
         url_keys.regist_status: REGIST_STATUS['registrant_confirm'],
         url_keys.regist_type: regist_type,
-        url_keys.registrant_redirect_token:registrant_redirect_token,
+        url_keys.regist_redirect_token:registrant_redirect_token,
         url_keys.regist_grant_user_token: registration.registrant_grant_user_token,
         }
     url_params = dwlib.urlencode(params)
@@ -382,11 +441,9 @@ def registrant_owner_grant(request, regist_callback_me):
 def registrant_confirm(request, regist_callback_me):
     print request.REQUEST
     user = request.user
-    registrant_redirect_token = request_get(request.REQUEST, url_keys.registrant_redirect_token)
+    registrant_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
     registrant_grant_user_token = request_get(request.REQUEST, url_keys.regist_grant_user_token)
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
-    print regist_type, registrant_redirect_token, registrant_grant_user_token
-    print url_keys.regist_grant_user_token
     if (check_compulsory((regist_type, registrant_redirect_token, registrant_grant_user_token))) == False:
         return error_response(5, ())
     if (check_choice(REGIST_TYPE, regist_type)) == False:
