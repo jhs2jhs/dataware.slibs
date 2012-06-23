@@ -14,7 +14,7 @@ def hello(request):
 ##### method to call for each regist_steps
 ####
 @login_required
-def method_regist_init(request):
+def regist_init(request):
     register_callback = 'http://localhost:8001/resource/regist'
     registrant_request_scope = "{'action':'read, write', 'content':'blog, status'}" # to be confirmed
     registrant_request_reminder = ''
@@ -32,7 +32,7 @@ def method_regist_init(request):
 
 ####
 @login_required
-def method_registrant_request(request, regist_callback_me):
+def registrant_request(request, regist_callback_me):
     user = request.user # user has to login, so that it would reduce the man-in-the middle attack, only logined user can make request, it will reduce unknown attack. We can also write code to limit the frequency of user to request, so that we can provide a health API over there. 
     register_callback = request_get(request.REQUEST, url_keys.regist_callback)
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
@@ -80,7 +80,7 @@ def method_registrant_request(request, regist_callback_me):
     return render_to_response('registrant_request.html', context)
 
 ####
-def method_register_owner_redirect(request, regist_callback_me):
+def register_owner_redirect(request, regist_callback_me):
     registrant_callback = request_get(request.REQUEST, url_keys.regist_callback)
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
@@ -134,7 +134,7 @@ def method_register_owner_redirect(request, regist_callback_me):
 
 ####
 @login_required
-def method_register_owner_grant(request, regist_callback_me):
+def register_owner_grant(request, regist_callback_me):
     user = request.user
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     register_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
@@ -186,7 +186,7 @@ def method_register_owner_grant(request, regist_callback_me):
 
 ####
 @login_required
-def method_register_grant(request, regist_callback_me):
+def register_grant(request, regist_callback_me):
     user = request.user
     register_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
     register_grant_user_token = request_get(request.REQUEST, url_keys.regist_grant_user_token)
@@ -265,7 +265,7 @@ def method_register_grant(request, regist_callback_me):
 
 ####
 @login_required
-def method_registrant_owner_redirect(request, regist_callback_me):
+def registrant_owner_redirect(request, regist_callback_me):
     user = request.user
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     registrant_request_token = request_get(request.REQUEST, url_keys.registrant_request_token)
@@ -326,7 +326,7 @@ def method_registrant_owner_redirect(request, regist_callback_me):
 
 ####
 @login_required
-def method_registrant_owner_grant(request, regist_callback_me):
+def registrant_owner_grant(request, regist_callback_me):
     user = request.user
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     registrant_redirect_token = request_get(request.REQUEST, url_keys.regist_redirect_token)
@@ -379,7 +379,7 @@ def method_registrant_owner_grant(request, regist_callback_me):
 
 ####
 @login_required
-def method_registrant_confirm(request, regist_callback_me):
+def registrant_confirm(request, regist_callback_me):
     print request.REQUEST
     user = request.user
     registrant_redirect_token = request_get(request.REQUEST, url_keys.registrant_redirect_token)
@@ -440,7 +440,7 @@ def method_registrant_confirm(request, regist_callback_me):
     
 
 ####
-def method_regist_finish(request):
+def regist_finish(request):
     register_access_token = request_get(request.REQUEST, url_keys.register_access_token)
     regist_type = request_get(request.REQUEST, url_keys.regist_type)
     if (check_compulsory((regist_type, register_access_token))) == False:
@@ -512,23 +512,23 @@ def regist_steps(request, regist_callback_me):
     regist_status = request_get(request.REQUEST, url_keys.regist_status)
     if regist_status == None:
         #return error_response(1, url_keys.regist_status)
-        return method_regist_init(request)
+        return regist_init(request)
     if regist_status == REGIST_STATUS['init']: # may not be necessary
-        return regist_dealer.regist_init()
+        return regist_init(request)
     if regist_status == REGIST_STATUS['registrant_request']:
-        return regist_dealer.registrant_request()
+        return registrant_request(request, regist_callback_me)
     if regist_status == REGIST_STATUS['register_owner_redirect']:
-        return regist_dealer.register_owner_redirect()
+        return register_owner_redirect(request, regist_callback_me)
     if regist_status == REGIST_STATUS['register_owner_grant']:
-        return regist_dealer.register_owner_grant()
+        return register_owner_grant(request, regist_callback_me)
     if regist_status == REGIST_STATUS['register_grant']:
-        return regist_dealer.register_grant()
+        return register_grant(request, regist_callback_me)
     if regist_status == REGIST_STATUS['registrant_owner_redirect']:
-        return regist_dealer.registrant_owner_redirect()
+        return registrant_owner_redirect(request, regist_callback_me)
     if regist_status == REGIST_STATUS['registrant_owner_grant']:
-        return regist_dealer.registrant_owner_grant()
+        return registrant_owner_grant(request, regist_callback_me)
     if regist_status == REGIST_STATUS['registrant_confirm']:
-        return regist_dealer.registrant_confirm()
+        return registrant_confirm(request, regist_callback_me)
     if regist_status == REGIST_STATUS['finish']: ## may not be necessary
-        return regist_dealer.regist_finish()
+        return regist_finish(request)
     return error_response(2, (url_keys.regist_status, regist_status))
