@@ -466,6 +466,7 @@ def method_regist_finish(request):
 
 
 ######################################
+
 class regist_dealer(object):
     def __init__(self, request):
         self.request = request
@@ -480,12 +481,38 @@ class regist_dealer(object):
     def registrant_confirm(self): pass
     def regist_finish(self): pass
 
-
+'''
 def regist_steps(regist_dealer, request):
     regist_status = request_get(request.REQUEST, url_keys.regist_status)
     if regist_status == None:
         #return error_response(1, url_keys.regist_status)
         return regist_dealer.regist_init()
+    if regist_status == REGIST_STATUS['init']: # may not be necessary
+        return regist_dealer.regist_init()
+    if regist_status == REGIST_STATUS['registrant_request']:
+        return regist_dealer.registrant_request()
+    if regist_status == REGIST_STATUS['register_owner_redirect']:
+        return regist_dealer.register_owner_redirect()
+    if regist_status == REGIST_STATUS['register_owner_grant']:
+        return regist_dealer.register_owner_grant()
+    if regist_status == REGIST_STATUS['register_grant']:
+        return regist_dealer.register_grant()
+    if regist_status == REGIST_STATUS['registrant_owner_redirect']:
+        return regist_dealer.registrant_owner_redirect()
+    if regist_status == REGIST_STATUS['registrant_owner_grant']:
+        return regist_dealer.registrant_owner_grant()
+    if regist_status == REGIST_STATUS['registrant_confirm']:
+        return regist_dealer.registrant_confirm()
+    if regist_status == REGIST_STATUS['finish']: ## may not be necessary
+        return regist_dealer.regist_finish()
+    return error_response(2, (url_keys.regist_status, regist_status))
+'''
+
+def regist_steps(request, regist_callback_me):
+    regist_status = request_get(request.REQUEST, url_keys.regist_status)
+    if regist_status == None:
+        #return error_response(1, url_keys.regist_status)
+        return method_regist_init(request)
     if regist_status == REGIST_STATUS['init']: # may not be necessary
         return regist_dealer.regist_init()
     if regist_status == REGIST_STATUS['registrant_request']:
