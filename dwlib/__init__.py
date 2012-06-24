@@ -3,6 +3,7 @@ import hashlib
 from datetime import datetime
 from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest
+import json
 
 class url_keys(object):
     # for each regist
@@ -150,21 +151,30 @@ def request_params_get(params):
         }
     return request_params
 
+def error_response_json(code, msg):
+    error = {
+        'error_code': code,
+        'error_message': msg,
+        }
+    error_json = json.dumps(error)
+    return HttpResponseBadRequest(error_json)
+
+
 def error_response(type, params):
     if type == 1:
-        return HttpResponseBadRequest('%s is not found in http request'%params)
+        return error_response_json(1, '%s is not found in http request'%params)
     if type == 2:
-        return HttpResponseBadRequest('%s is found but incorrect (%s) in http request'%params)
+        return error_response_json(2, '%s is found but incorrect (%s) in http request'%params)
     if type == 3:
-        return HttpResponseBadRequest('Token (%s) is not exist with value (%s)'%params)
+        return error_response_json(3, 'Token (%s) is not exist with value (%s)'%params)
     if type == 4:
-        return HttpResponseBadRequest('Token (%s) is expired with value (%s)'%params)
+        return error_response_json(4, 'Token (%s) is expired with value (%s)'%params)
     if type == 5:
-        return HttpResponseBadRequest('You did not provide correct value for every required paramters')
+        return error_response_json(5, 'You did not provide correct value for every required paramters')
     if type == 6:
-        return HttpResponseBadRequest('Incorrect User')
+        return error_response_json(6, 'Incorrect User')
     if type == 7:
-        return HttpResponseBadRequest('Token (%s) has been used and can not be used any more with this value (%s)'%params)
+        return error_response_json(7, 'Token (%s) has been used and can not be used any more with this value (%s)'%params)
 
 def check_compulsory(lists):
     right = True
