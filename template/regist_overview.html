@@ -1,0 +1,41 @@
+{% extends "./base_regist.html" %}
+
+{% block regist %}
+
+<form method="post" action="{{ regist_init_url }}">
+{% csrf_token %}
+Make a new request: <input type="submit" name="request" value="Request"/>
+</form> 
+
+<br><br>
+View all your registration
+
+<table>
+<tr>
+  <th>Regist Status & Type</th>
+  <th>Registrant</th>
+  <th>Register</th>
+</tr>
+{% for regist in regists %}
+<tr>
+  <td>
+    {{ regist.regist_status }}<br>
+    {{ regist.regist_type }}
+  </td>
+  <td>
+    Callback: {{ regist.registrant_callback }}<br>
+    Access_Validate:{{ regist.registrant_access_validate}}<br>
+    <textarea rows="3" cols="35">Access_Token:{{ regist.registrant_access_token }}</textarea><br>
+  </td>
+  <td>
+    Callback: {{ regist.register_callback }}<br>
+    Access_Validate:{{ regist.register_access_validate}}<br>
+    <textarea rows="3" cols="35">Access_Token:{{ regist.register_access_token }}</textarea><br>
+  </td>
+</tr>
+{% endfor %}
+</table>
+
+
+{% endblock %}
+

@@ -12,6 +12,35 @@ def hello(request):
     return HttpResponse('hello, libauth')
 
 ##### method to call for each regist_steps
+@login_required
+def regist_overview(request, regist_callback_me):
+    regists = {}
+    try:
+        regists = Registration.objects.all()
+    except:
+        regists = {}
+    c = {
+        'regist_init_url':regist_callback_me+"?"+url_keys.regist_status+"="+REGIST_STATUS['init'],
+        'regists': []
+        }
+    for regist in regists:
+        #print regist.register_access_token
+        c_regist = {
+            'regist_status':regist.get_regist_status_display(),
+            'regist_type':regist.get_regist_type_display(),
+            'registrant_access_token':regist.registrant_access_token,
+            'registrant_access_validate':regist.registrant_access_validate,
+            'registrant_callback':regist.registrant_callback,
+            'register_access_token':regist.register_access_token,
+            'register_access_validate':regist.register_access_validate,
+            'register_callback':regist.register_callback,
+            }
+        c['regists'].append(c_regist)
+    print c['regist_init_url'], "hello"
+    context = context = RequestContext(request, c)
+    return render_to_response('regist_overview.html', context)
+
+
 ####
 @login_required
 def regist_init(request):
@@ -275,6 +304,7 @@ def registrant_owner_redirect(request, regist_callback_me):
     if regist_type == REGIST_TYPE['mutual']:
         return registrant_owner_redirect_mutual(request, regist_callback_me)
 
+
 ##
 @login_required
 def registrant_owner_redirect_one_way(request, regist_callback_me):
@@ -527,7 +557,8 @@ def regist_steps(request, regist_callback_me):
     regist_status = request_get(request.REQUEST, url_keys.regist_status)
     if regist_status == None:
         #return error_response(1, url_keys.regist_status)
-        return regist_init(request)
+        #return regist_init(request)
+        return regist_overview(request, regist_callback_me)
     if regist_status == REGIST_STATUS['init']: # may not be necessary
         return regist_init(request)
     if regist_status == REGIST_STATUS['registrant_request']:
